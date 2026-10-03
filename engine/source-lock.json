@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/ggml-org/llama.cpp",
+  "revision": "836d57176dc699a726c55418e4f96b8ca628e1bf",
+  "archive_url": "https://github.com/ggml-org/llama.cpp/archive/836d57176dc699a726c55418e4f96b8ca628e1bf.tar.gz",
+  "archive_sha256": "af433e4cfa960c3f257c9cba972a95e69108306368301e35da7be3df5383fb05",
+  "source_directory": ".cache/llama.cpp-836d57176dc699a726c55418e4f96b8ca628e1bf",
+  "patch": "engine/patches/q4k-vnni.patch"
+}

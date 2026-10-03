@@ -1,0 +1,7 @@
+{
+  "name": "basic-instruction-smoke-v1",
+  "cases": [
+    {"id": "arithmetic", "prompt": "What is 17 + 25? Reply with only the number.", "expected": "42"},
+    {"id": "extraction", "prompt": "Extract the ticket ID from: 'Please investigate ticket ZX-204 today.' Reply with only the ticket ID.", "expected": "ZX-204"}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "sdk": {
+    "version": "0.20.38",
+    "platform": "linux-x64",
+    "url": "https://github.com/RunanywhereAI/runanywhere-sdks/releases/download/v0.20.38/RunAnywhere-cpp-desktop-linux-x64-v0.20.38.tar.gz",
+    "sha256": "602eedd836137def5dc819d0eda192ab845f8a1046a7393ca2a3d855b250c978"
+  },
+  "smoke_model": {
+    "url": "https://huggingface.co/bartowski/SmolLM2-135M-Instruct-GGUF/resolve/main/SmolLM2-135M-Instruct-Q4_K_M.gguf",
+    "sha256": "2e8040ceae7815abe0dcb3540b9995eaa1fa0d2ca9e797d0a635ae4433c68c2d"
+  }
+}

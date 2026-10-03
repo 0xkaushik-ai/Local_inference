@@ -1,0 +1,192 @@
+--- a/ggml/src/ggml-cpu/arch/x86/repack.cpp
++++ b/ggml/src/ggml-cpu/arch/x86/repack.cpp
+@@ -1461,7 +1461,7 @@
+     ggml_gemv_q4_0_8x8_q8_0_generic(n, s, bs, vx, vy, nr, nc);
+ }
+ 
+-void ggml_gemv_q4_K_8x8_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
++static void devicebench_gemv_q4_K_8x8_q8_K_baseline(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
+     const int qk = QK_K;
+     const int nb = n / qk;
+     const int ncols_interleaved = 8;
+@@ -1682,6 +1682,180 @@
+     UNUSED(kmask3);
+     ggml_gemv_q4_K_8x8_q8_K_generic(n, s, bs, vx, vy, nr, nc);
+ #endif
++}
++
++// DeviceBench candidate for the existing eight-byte Q4_K weight interleave.
++// This function is embedded in the reproducible experiment patch; no repacking
++// or GEMM change is required.
++#include "../../repack.h"
++
++#include <cassert>
++#include <cstdint>
++#include <cstdlib>
++#include <cstring>
++#include <immintrin.h>
++
++#if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__) && \
++    defined(__AVX2__) && defined(__F16C__) && defined(__FMA__)
++
++// The repacked 12-byte record decodes to [s0..s7, min0..min7].
++static inline __m128i devicebench_avx512_scales(const uint8_t * packed) {
++    uint32_t values[4];
++    std::memcpy(values, packed, 12);
++    values[3] = ((values[2] >> 4) & 0x0f0f0f0f) | (((values[1] >> 6) & 0x03030303) << 4);
++    const uint32_t upper_mins = values[1] & 0x3f3f3f3f;
++    values[1] = (values[2] & 0x0f0f0f0f) | (((values[0] >> 6) & 0x03030303) << 4);
++    values[2] = upper_mins;
++    values[0] &= 0x3f3f3f3f;
++    return _mm_set_epi32(values[3], values[2], values[1], values[0]);
++}
++
++static inline __m512i devicebench_avx512_broadcast_q8(const int8_t * source) {
++    int64_t bytes;
++    std::memcpy(&bytes, source, sizeof(bytes));
++    return _mm512_set1_epi64(bytes);
++}
++
++static inline void devicebench_avx512_dot_part(const uint8_t * weights,
++        const int8_t * activations, int part, __m512i & low, __m512i & high) {
++    // Eight consecutive bytes per column, with eight columns per 64-byte load.
++    // VNNI produces two int32 lanes per column; keep those lanes until the
++    // complete 256-element block has been scaled and accumulated.
++    const __m512i packed = _mm512_loadu_si512(weights + part * 64);
++    const __m512i nibble_mask = _mm512_set1_epi8(15);
++    const __m512i q4_low = _mm512_and_si512(packed, nibble_mask);
++    const __m512i q4_high = _mm512_and_si512(_mm512_srli_epi16(packed, 4), nibble_mask);
++    low = _mm512_dpbusd_epi32(low, q4_low,
++        devicebench_avx512_broadcast_q8(activations + part * 8));
++    high = _mm512_dpbusd_epi32(high, q4_high,
++        devicebench_avx512_broadcast_q8(activations + 32 + part * 8));
++}
++
++extern "C" bool devicebench_q4k_avx512_available() {
++    return true;
++}
++
++extern "C" void devicebench_q4k_avx512_gemv(int n, float * output, size_t,
++        const void * weights, const void * activations, int nr, int nc) {
++    assert(n % QK_K == 0);
++    assert(nc % 8 == 0);
++    assert(nr == 1); // The repacked GEMV caller handles each activation row separately.
++    (void) nr;
++    const int blocks = n / QK_K;
++    const auto * inputs = static_cast<const block_q8_K *>(activations);
++    const auto * packed_weights = static_cast<const block_q4_Kx8 *>(weights);
++
++    for (int group = 0; group < nc / 8; ++group) {
++        const block_q4_Kx8 * columns = packed_weights + group * blocks;
++        __m256 float_dots = _mm256_setzero_ps();
++        __m256 float_mins = _mm256_setzero_ps();
++        for (int block = 0; block < blocks; ++block) {
++            const block_q4_Kx8 & weight = columns[block];
++            const block_q8_K & input = inputs[block];
++            __m512i scaled_dots = _mm512_setzero_si512();
++            __m256i min_correction = _mm256_setzero_si256();
++            for (int subblock = 0; subblock < 4; ++subblock) {
++                const __m128i scale_low = devicebench_avx512_scales(weight.scales + 24 * subblock);
++                const __m128i scale_high = devicebench_avx512_scales(weight.scales + 24 * subblock + 12);
++                const __m512i scale_low_lanes = _mm512_cvtepu8_epi32(_mm_unpacklo_epi8(scale_low, scale_low));
++                const __m512i scale_high_lanes = _mm512_cvtepu8_epi32(_mm_unpacklo_epi8(scale_high, scale_high));
++
++                __m512i low_even = _mm512_setzero_si512();
++                __m512i low_odd = _mm512_setzero_si512();
++                __m512i high_even = _mm512_setzero_si512();
++                __m512i high_odd = _mm512_setzero_si512();
++                const uint8_t * quants = weight.qs + 256 * subblock;
++                const int8_t * input_quants = input.qs + 64 * subblock;
++                devicebench_avx512_dot_part(quants, input_quants, 0, low_even, high_even);
++                devicebench_avx512_dot_part(quants, input_quants, 1, low_odd, high_odd);
++                devicebench_avx512_dot_part(quants, input_quants, 2, low_even, high_even);
++                devicebench_avx512_dot_part(quants, input_quants, 3, low_odd, high_odd);
++
++                const __m512i low_dot = _mm512_add_epi32(low_even, low_odd);
++                const __m512i high_dot = _mm512_add_epi32(high_even, high_odd);
++                scaled_dots = _mm512_add_epi32(scaled_dots, _mm512_add_epi32(
++                    _mm512_mullo_epi32(low_dot, scale_low_lanes),
++                    _mm512_mullo_epi32(high_dot, scale_high_lanes)));
++
++                const __m256i low_mins = _mm256_cvtepu8_epi32(_mm_srli_si128(scale_low, 8));
++                const __m256i high_mins = _mm256_cvtepu8_epi32(_mm_srli_si128(scale_high, 8));
++                const int low_sum = int(input.bsums[subblock * 4]) + input.bsums[subblock * 4 + 1];
++                const int high_sum = int(input.bsums[subblock * 4 + 2]) + input.bsums[subblock * 4 + 3];
++                min_correction = _mm256_add_epi32(min_correction, _mm256_add_epi32(
++                    _mm256_mullo_epi32(low_mins, _mm256_set1_epi32(low_sum)),
++                    _mm256_mullo_epi32(high_mins, _mm256_set1_epi32(high_sum))));
++            }
++
++            // Each pair contains disjoint integer partial sums for one column.
++            // Worst-case absolute total is 256 * 15 * 128 * 63 < INT32_MAX.
++            const __m512i pair_sums = _mm512_add_epi32(scaled_dots, _mm512_srli_epi64(scaled_dots, 32));
++            const __m256i integer_dots = _mm512_cvtepi64_epi32(pair_sums);
++            const __m256 input_scale = _mm256_set1_ps(input.d);
++            const __m256 weight_scale = _mm256_cvtph_ps(_mm_loadu_si128(
++                reinterpret_cast<const __m128i *>(weight.d)));
++            const __m256 weight_min = _mm256_cvtph_ps(_mm_loadu_si128(
++                reinterpret_cast<const __m128i *>(weight.dmin)));
++            // Match upstream exactly: separate dot/min FMA chains in block order,
++            // identical scale multiplication, and one subtraction after all blocks.
++            float_dots = _mm256_fmadd_ps(_mm256_cvtepi32_ps(integer_dots),
++                _mm256_mul_ps(weight_scale, input_scale), float_dots);
++            float_mins = _mm256_fmadd_ps(_mm256_cvtepi32_ps(min_correction),
++                _mm256_mul_ps(weight_min, input_scale), float_mins);
++        }
++        _mm256_storeu_ps(output + group * 8, _mm256_sub_ps(float_dots, float_mins));
++    }
++}
++
++#else
++extern "C" bool devicebench_q4k_avx512_available() {
++    return false;
++}
++extern "C" void devicebench_q4k_avx512_gemv(int, float *, size_t,
++        const void *, const void *, int, int) {
++    std::abort();
++}
++#endif
++
++
++// One process selects one variant; no environment lookups occur inside kernels.
++extern "C" {
++GGML_BACKEND_API bool devicebench_q4k_vnni_available() {
++    return devicebench_q4k_avx512_available();
++}
++GGML_BACKEND_API void devicebench_q4k_kernel_test(
++        bool candidate, int n, float * s, const void * vx, const void * vy, int nc) {
++    if (candidate) {
++        if (!devicebench_q4k_avx512_available()) {
++            GGML_ABORT("DeviceBench Q4_K AVX512 VNNI candidate unavailable in this build");
++        }
++        devicebench_q4k_avx512_gemv(n, s, nc, vx, vy, 1, nc);
++        return;
++    }
++    devicebench_gemv_q4_K_8x8_q8_K_baseline(n, s, nc, vx, vy, 1, nc);
++}
++} // extern "C"
++
++void ggml_gemv_q4_K_8x8_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
++    static const bool enabled = [] {
++        const char * value = std::getenv("DEVICEBENCH_Q4K_VNNI");
++        const bool requested = value && std::strcmp(value, "1") == 0;
++        if (requested && !devicebench_q4k_avx512_available()) {
++            GGML_ABORT("DeviceBench Q4_K AVX512 VNNI candidate unavailable in this build");
++        }
++        return requested;
++    }();
++    // The production caller currently uses nr==1. Keep the complete upstream
++    // behavior for any other caller instead of depending on a release assertion.
++    if (enabled && nr == 1) {
++        static const bool announced = [] {
++            std::fprintf(stderr, "DEVICEBENCH_Q4K_VNNI active: direct AVX512 repacked Q4_K GEMV\n");
++            return true;
++        }();
++        (void) announced;
++        devicebench_q4k_avx512_gemv(n, s, bs, vx, vy, nr, nc);
++        return;
++    }
++    devicebench_gemv_q4_K_8x8_q8_K_baseline(n, s, bs, vx, vy, nr, nc);
+ }
+ 
+ void ggml_gemv_iq4_nl_8x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {

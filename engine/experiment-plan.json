@@ -1,0 +1,21 @@
+{
+  "question": "Does the opt-in Q4_K VNNI GEMV kernel improve resident CPU inference on this host without numerical changes?",
+  "primary_model": {
+    "name": "Qwen3-0.6B-Q4_K_M",
+    "source": "unsloth/Qwen3-0.6B-GGUF",
+    "revision": "50968a4468ef4233ed78cd7c3de230dd1d61a56b",
+    "url": "https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/50968a4468ef4233ed78cd7c3de230dd1d61a56b/Qwen3-0.6B-Q4_K_M.gguf",
+    "sha256": "ac2d97712095a558e31573f62f466a3f9d93990898b0ec79d7c974c1780d524a",
+    "selection_reason": "Hidden width 1024 permits Q4_K weights throughout more projections; chosen before whole-model candidate measurements. SmolLM2 hidden width 576 causes most projections to use other quantizations; separate diagnostic attributed only about 6 percent of its decode operator time to Q4_K and is perturbed by profiling."
+  },
+  "regression_model": "SmolLM2-135M-Instruct-Q4_K_M, hash in native/sdk-lock.json",
+  "primary_workload": {"prompt_tokens": 128, "decode_tokens": 64, "sequence_seed": 42},
+  "additional_workloads": [{"prompt_tokens": 512, "decode_tokens": 64, "sequence_seed": 73}, {"prompt_tokens": 1024, "decode_tokens": 64, "sequence_seed": 123}],
+  "tuning": "Select baseline threads from 1/2/4/8 physical cores and flash attention on/off by lowest primary resident-total median; same configuration for candidate and all workloads.",
+  "correctness": "Kernel fixtures bitwise equality; full vocabulary at 17 positions per workload at atol=rtol=1e-5 with identical greedy choices.",
+  "paired_blocks_primary_model": 8,
+  "repeats_per_process": 3,
+  "warmups_per_process": 1,
+  "exploratory_acceptance": "Primary median baseline/candidate resident-total ratio >=1.20, paired bootstrap95 lower bound >1, no additional-workload total slowdown >5 percent. Correctness required. Not sufficient for a general product claim.",
+  "limitations": "Same binary includes original arithmetic and candidate; no pristine-upstream binary comparison. Synthetic fixed tokens; no sampling. Single shared laptop; dynamic frequencies and background load."
+}
