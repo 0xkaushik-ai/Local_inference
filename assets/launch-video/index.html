@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeviceBench — V1 launch film</title>
+    <style>
+      @font-face {
+        font-family: "Plex";
+        src: url("./fonts/ibm-plex-sans.woff2") format("woff2");
+        font-weight: 100 900;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Plex Mono";
+        src: url("./fonts/ibm-plex-mono.woff2") format("woff2");
+        font-weight: 400;
+        font-display: block;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #f6f5f1;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas
+      id="film"
+      width="3840"
+      height="2160"
+      aria-label="DeviceBench V1 launch film"
+    ></canvas>
+    <script src="./scene.js"></script>
+  </body>
+</html>

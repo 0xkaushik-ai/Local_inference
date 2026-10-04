@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="Meet DeviceBench. Three tools to check your local AI setup, understand your model, and test the features your app needs."
+    />
+    <title>Meet DeviceBench</title>
+    <style>
+      @font-face {
+        font-family: Plex;
+        src: url("./fonts/ibm-plex-sans.woff2") format("woff2");
+        font-weight: 100 900;
+        font-display: swap;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #f6f5f1;
+        color: #242521;
+        font-family: Plex, sans-serif;
+      }
+      main {
+        max-width: 1500px;
+        margin: auto;
+        padding: 40px clamp(20px, 4vw, 64px) 64px;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(26px, 4vw, 42px);
+        font-weight: 550;
+        letter-spacing: -0.035em;
+      }
+      .edition {
+        color: #66685f;
+        font-size: 15px;
+      }
+      video {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border: 1px solid #d9dad2;
+        border-radius: 12px;
+        background: #f6f5f1;
+        box-shadow: 0 18px 55px #2425210a;
+      }
+      .description {
+        font-size: clamp(19px, 2.4vw, 26px);
+        line-height: 1.45;
+        max-width: 900px;
+        margin: 28px 0 20px;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      a {
+        color: #a43725;
+        text-underline-offset: 4px;
+      }
+      nav a {
+        padding: 12px 18px;
+        border: 1px solid #d9dad2;
+        border-radius: 6px;
+        color: #242521;
+        text-decoration: none;
+        background: white;
+      }
+      nav a:first-child {
+        background: #242521;
+        color: #f6f5f1;
+        border-color: #242521;
+      }
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid #a43725;
+        outline-offset: 4px;
+      }
+      details {
+        max-width: 900px;
+        margin-top: 36px;
+        color: #66685f;
+        line-height: 1.6;
+      }
+      summary {
+        cursor: pointer;
+        color: #242521;
+      }
+      li {
+        margin-bottom: 8px;
+      }
+      footer {
+        margin-top: 38px;
+        color: #66685f;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Meet devicebench</h1>
+        <span class="edition">V1 preview · 48 seconds</span>
+      </header>
+      <video
+        controls
+        playsinline
+        preload="metadata"
+        poster="./devicebench-v1-poster-4k.png"
+        aria-label="DeviceBench V1 launch film"
+      >
+        <source src="./devicebench-v1-1080p.mp4" type="video/mp4" />
+        <track
+          kind="subtitles"
+          src="./captions.vtt"
+          srclang="en"
+          label="English — on-screen story"
+        />
+        Your browser cannot play this video.
+        <a href="./devicebench-v1-1080p.mp4">Download the film</a>.
+      </video>
+      <p class="description">
+        Your machine. Clear next steps. Check your local AI setup, understand
+        your model, and test the features your app needs.
+      </p>
+      <nav aria-label="Film downloads">
+        <a href="./devicebench-v1-4k.mp4" download>Download 4K film</a>
+        <a href="./devicebench-v1-1080p.mp4" download>Download sharing copy</a>
+        <a href="./devicebench-v1-poster-4k.png" download>Download poster</a>
+        <a href="https://github.com/0xkaushik-ai/Local_inference"
+          >Explore DeviceBench</a
+        >
+      </nav>
+      <details>
+        <summary>Read the film</summary>
+        <ol>
+          <li>
+            <strong>Local AI. Ready for your app?</strong> Your hardware. Your
+            model. A few important questions.
+          </li>
+          <li>
+            <strong>Meet DeviceBench.</strong> Three tools. One local workspace.
+          </li>
+          <li>
+            <strong>Local AI Doctor.</strong> Check your runtime, installed
+            models, and hardware. These checks are read-only and do not load a
+            model.
+          </li>
+          <li>
+            <strong>Model &amp; Context Checker.</strong> Inspect context limits
+            and estimate memory. Confirm actual loading with your runtime.
+          </li>
+          <li>
+            <strong>App Compatibility Tester.</strong> Test streaming,
+            structured JSON, tool calling, or embeddings. Support depends on the
+            selected model and server.
+          </li>
+          <li>
+            <strong>Start with what you are building.</strong> Choose a preset
+            for a chatbot, data extraction, tool assistant, or semantic search.
+            Presets select API checks; they do not validate an entire
+            application.
+          </li>
+          <li>
+            <strong>Keep the evidence.</strong> Download a readable HTML report
+            or take the JSON into your workflow.
+          </li>
+          <li>
+            <strong>Your machine. Clear next steps.</strong> Diagnose, inspect,
+            test, and export. No account required.
+          </li>
+          <li>
+            <strong>Explore the V1 preview.</strong> DeviceBench is available on
+            GitHub.
+          </li>
+        </ol>
+      </details>
+      <footer>
+        Original DeviceBench animation and instrumental score. The film uses
+        simplified product views with labeled recorded examples.
+      </footer>
+    </main>
+  </body>
+</html>

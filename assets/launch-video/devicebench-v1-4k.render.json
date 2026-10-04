@@ -1,0 +1,30 @@
+{
+  "createdAt": "2026-10-04T20:56:37.824Z",
+  "source": "assets/launch-video/index.html",
+  "output": "assets/launch-video/devicebench-v1-4k.mp4",
+  "width": 3840,
+  "height": 2160,
+  "fps": 60,
+  "startSeconds": 0,
+  "durationSeconds": 48,
+  "frameCount": 2880,
+  "workers": 3,
+  "frameTransfer": "lossless PNG; native requested canvas resolution",
+  "frameIsolation": "fresh canvas backing store for every frame; GPU canvas disabled",
+  "video": {
+    "codec": "H.264 High",
+    "pixelFormat": "yuv420p",
+    "colorSpace": "Rec.709",
+    "crf": 16,
+    "preset": "medium"
+  },
+  "audio": {
+    "source": "reports/launch-video/score.wav",
+    "codec": "AAC",
+    "sampleRate": 48000,
+    "bitRate": 320000
+  },
+  "elapsedSeconds": 262.98,
+  "renderFramesPerSecond": 10.95,
+  "bytes": 13756301
+}

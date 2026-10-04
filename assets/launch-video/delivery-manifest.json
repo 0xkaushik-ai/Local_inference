@@ -1,0 +1,140 @@
+{
+  "product": "DeviceBench",
+  "edition": "V1 preview",
+  "checked_at": "2026-10-04T21:00:45.679Z",
+  "status": "passed",
+  "exports": [
+    {
+      "file": "devicebench-v1-4k.mp4",
+      "bytes": 13756301,
+      "sha256": "5f93daa6d3065138270d8bf85388ad24aa1eec9efd95633bf1a128b0b4da4228",
+      "duration_seconds": 48.0,
+      "width": 3840,
+      "height": 2160,
+      "fps": "60/1",
+      "decoded_frames": 2880,
+      "video": {
+        "codec": "h264",
+        "profile": "High",
+        "level": 5.2,
+        "pixel_format": "yuv420p",
+        "color_primaries": "bt709",
+        "color_transfer": "bt709",
+        "color_space": "bt709",
+        "color_range": "tv"
+      },
+      "audio": {
+        "codec": "aac",
+        "sample_rate": 48000,
+        "channels": 2,
+        "integrated_lufs": -16.01,
+        "true_peak_dbtp": -1.67,
+        "loudness_range_lu": 3.3
+      },
+      "checks": {
+        "dimensions": true,
+        "constant_frame_rate": true,
+        "expected_frame_count": true,
+        "exact_48_second_duration": true,
+        "h264_high_yuv420p": true,
+        "rec709_all_tags": true,
+        "aac_stereo_48khz": true,
+        "fast_start_moov_before_mdat": true,
+        "full_video_audio_decode": true,
+        "loudness_range": true,
+        "true_peak_below_minus_1_dbtp": true
+      }
+    },
+    {
+      "file": "devicebench-v1-1080p.mp4",
+      "bytes": 5351615,
+      "sha256": "ec8c4d22abef9f194d4c4487c78c1ff776c7840cce65e62cd1a779575b9ea07a",
+      "duration_seconds": 48.0,
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "decoded_frames": 1440,
+      "video": {
+        "codec": "h264",
+        "profile": "High",
+        "level": 4.1,
+        "pixel_format": "yuv420p",
+        "color_primaries": "bt709",
+        "color_transfer": "bt709",
+        "color_space": "bt709",
+        "color_range": "tv"
+      },
+      "audio": {
+        "codec": "aac",
+        "sample_rate": 48000,
+        "channels": 2,
+        "integrated_lufs": -16.01,
+        "true_peak_dbtp": -1.67,
+        "loudness_range_lu": 3.3
+      },
+      "checks": {
+        "dimensions": true,
+        "constant_frame_rate": true,
+        "expected_frame_count": true,
+        "exact_48_second_duration": true,
+        "h264_high_yuv420p": true,
+        "rec709_all_tags": true,
+        "aac_stereo_48khz": true,
+        "fast_start_moov_before_mdat": true,
+        "full_video_audio_decode": true,
+        "loudness_range": true,
+        "true_peak_below_minus_1_dbtp": true
+      }
+    }
+  ],
+  "poster": {
+    "file": "devicebench-v1-poster-4k.png",
+    "width": 3840,
+    "height": 2160,
+    "bytes": 1797060,
+    "sha256": "b067714dce1d5fee023091c7c8ba95721a5bfd181c0adc02c4c387010978f91e"
+  },
+  "browser_verification": {
+    "browser": "Google Chrome 151 on Linux",
+    "playback_and_seek": [
+      {
+        "file": "devicebench-v1-1080p.mp4",
+        "duration": 48,
+        "width": 1920,
+        "height": 1080,
+        "currentTime": 20.8,
+        "readyState": 4,
+        "mediaError": null,
+        "canPlayMP4": "maybe",
+        "decodedFrames": 167
+      },
+      {
+        "file": "devicebench-v1-4k.mp4",
+        "duration": 48,
+        "width": 3840,
+        "height": 2160,
+        "currentTime": 20.8,
+        "readyState": 4,
+        "mediaError": null,
+        "canPlayMP4": "maybe",
+        "decodedFrames": 325
+      }
+    ],
+    "caption_cues": 9,
+    "desktop_viewport": [1440, 1100],
+    "mobile_viewport": [390, 844],
+    "mobile_overflow": false,
+    "clean_end": true,
+    "http_range_requests": {
+      "status": 206,
+      "bytes": 100
+    },
+    "page_errors": []
+  },
+  "evidence": [
+    "reports/launch-video/export-qa.json",
+    "reports/launch-video/playback-qa.json"
+  ],
+  "creative_source": "scene.js",
+  "music_source": "../../scripts/make-launch-score.py"
+}

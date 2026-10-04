@@ -1,0 +1,3 @@
+# Optional dependencies for the original launch-film soundtrack.
+# Install into the project's ignored .venv directory.
+numpy==2.3.5

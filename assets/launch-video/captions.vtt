@@ -1,0 +1,37 @@
+WEBVTT
+
+00:00.000 --> 00:04.800
+Local AI. Ready for your app?
+Your hardware. Your model. A few important questions.
+
+00:04.800 --> 00:09.600
+Meet DeviceBench.
+Three tools. One local workspace.
+
+00:09.600 --> 00:16.800
+Local AI Doctor: check your runtime, installed models, and hardware.
+Read-only checks. No model is loaded.
+
+00:16.800 --> 00:24.000
+Model & Context Checker: inspect context limits and estimate memory.
+An estimate is not a guarantee that a model will load.
+
+00:24.000 --> 00:31.200
+App Compatibility Tester: test streaming, structured JSON, tool calling, or embeddings.
+Support depends on the selected model and server.
+
+00:31.200 --> 00:36.000
+Choose a preset for a chatbot, data extraction, tool assistant, or semantic search.
+Adjust the checks and run when you are ready.
+
+00:36.000 --> 00:40.800
+Keep the evidence.
+Download a readable HTML report or use the JSON in your workflow.
+
+00:40.800 --> 00:44.400
+Your machine. Clear next steps.
+Diagnose, inspect, test, and export. No account required.
+
+00:44.400 --> 00:48.000
+DeviceBench. Explore the V1 preview.
+github.com/0xkaushik-ai/Local_inference
