@@ -1,0 +1,53 @@
+name: Readiness toolkit
+on:
+  push:
+  pull_request:
+jobs:
+  python:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ['3.11', '3.13']
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -r requirements-dev.lock
+      - run: python -m pip install --no-deps --no-build-isolation -e .
+      - run: python -m unittest discover -s tests -v
+      - run: ruff check
+      - run: ruff format --check
+      - run: python -m build --no-isolation
+      - run: python scripts/check-release.py dist/devicebench_local-0.2.0-py3-none-any.whl
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m venv .venv
+      - run: .venv/bin/python -m pip install -r requirements-dev.lock
+      - run: .venv/bin/python -m pip install --no-deps --no-build-isolation -e .
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+        working-directory: site
+      - run: npx playwright install --with-deps chrome
+        working-directory: site
+      - run: npm run build
+        working-directory: site
+      - run: npm run lint
+        working-directory: site
+      - run: npm test
+        working-directory: site
+      - run: npm run test:toolkit
+        working-directory: site

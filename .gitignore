@@ -6,3 +6,7 @@ reports/
 dist/
 build/
 .env
+node_modules/
+playwright-report/
+test-results/
+*.tsbuildinfo

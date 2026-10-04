@@ -1,11 +1,49 @@
-# DeviceBench and CPU Engine Experiment
+# DeviceBench — project handoff
 
-This document is the handoff for the work in this repository. **DeviceBench** runs local inference checks and saves inspectable reports. The separate **CPU engine experiment** changes one quantized matrix-vector kernel in a pinned version of llama.cpp. The engine work is an experimental modification of llama.cpp, not a new independent inference engine or a demonstrated replacement for RunAnywhere.
+This is the repository-wide handoff for DeviceBench. The first public **V1** is a
+local AI readiness toolkit with three tools, a dashboard, CLI, and reports. The
+current development package is `0.2.0`. Existing benchmark and CPU research work
+is documented as an optional advanced track. Start with the
+[documentation overview](docs/overview.md) for a guide to every workflow and the
+[quickstart](docs/quickstart.md) for source, Windows, or local-wheel installation.
+The [roadmap](docs/roadmap.md) consolidates current scope and remaining work.
+
+## Product and interfaces
+
+The V1 product journey is **connect → diagnose → inspect a model → test app
+features → export a report**. Tools are independently usable. Readiness checks
+share Python implementations between the CLI and local dashboard on port 8766.
+Benchmarks use the CLI. The React website on development port 8765 presents the
+product, illustrative readiness reports, and documentation bundled from repository
+Markdown. It does not inspect hardware or run inference.
+
+| Workflow | Entry point | Guide |
+| --- | --- | --- |
+| Local AI Doctor | `devicebench doctor` or local dashboard | [Doctor](docs/readiness-toolkit.md#local-ai-doctor) |
+| Model & Context Checker | `devicebench inspect` or local dashboard | [Model/context reference](docs/readiness-toolkit.md#model-and-context-checker) |
+| App Compatibility Tester | `devicebench compat` or local dashboard | [Compatibility reference](docs/readiness-toolkit.md#app-compatibility-tester) |
+| Benchmark and export | `devicebench run` / `import` | [Benchmark guide](docs/benchmarks.md) |
+| Website and docs | `cd site` then `npm run dev` after `npm ci` | [Website development](site/README.md) |
+| Architecture, tests, and packaging | Python, npm, and native workflows | [Contributor guide](docs/development.md) |
+| CPU experiment | Native build and `devicebench.engine_lab` | [Protocol](docs/engine-experiment.md) |
+
+The CPU experiment modifies one kernel in pinned llama.cpp. Its isolated speedup
+is not evidence of a general whole-model performance advantage.
 
 ## What is built
 
+DeviceBench V1 centers on the **Local AI Doctor**, **Model & Context Checker**,
+and **App Compatibility Tester**, sharing a loopback dashboard and Python CLI.
+These tools support native Ollama and local OpenAI-compatible APIs with explicit
+capability limits. See [toolkit installation and usage](docs/readiness-toolkit.md)
+and [current release evidence](docs/readiness-release.md). Benchmark-control
+improvements are deferred; the existing benchmark and CPU experiment described
+below remain separate workflows.
+
 | Part | What it does | Main files |
 | --- | --- | --- |
+| V1 readiness tools | Diagnoses local runtimes and hardware, estimates supported model/context memory, and probes selected app capabilities. | `src/devicebench/readiness/checks.py`, `hardware.py`, `transport.py` |
+| Local dashboard and reports | Runs the same checks as the CLI, explains findings, and downloads HTML/JSON reports. | `src/devicebench/readiness/server.py`, `report.py`, `web/` |
 | DeviceBench CLI | Runs a prompt suite through local Ollama or RunAnywhere, checks exact answers, and writes JSON, JSONL, and standalone HTML evidence. | `src/devicebench/cli.py`, `suites/smoke.json` |
 | RunAnywhere adapter | Calls the Linux x64 desktop kit's llama.cpp backend through a small C++ bridge. Records loading and generation separately. | `native/runanywhere.cpp`, `src/devicebench/runanywhere.py` |
 | CPU kernel experiment | Selects original or direct AVX-512/VNNI Q4_K arithmetic with `DEVICEBENCH_Q4K_VNNI`. It keeps the existing model format. | `engine/patches/q4k-vnni.patch` |
@@ -93,4 +131,11 @@ Each CLI run creates `report.html`, `report.json`, and `runs.jsonl` in a new tim
 
 ## Current limits and next work
 
-The CPU result covers one laptop, two small GGUF models, and synthetic fixed-token benchmark inputs. The one-core observation needs more paired runs on a quiet machine and another device. To pursue a competitive inference product, the next technical milestone is a repeatable **whole-model** gain against a tuned baseline, followed by a usable integration API and distribution workflow. The existing code is a research prototype; no public package, deployment, or commercial validation is established. A distribution license for this project has not been selected; the included llama.cpp code retains its upstream MIT notice in `engine/LLAMA-LICENSE`.
+For the entire project, follow the [consolidated roadmap](docs/roadmap.md).
+The V1 preview (development package `0.2.0`) has a locally built wheel and recorded Linux validation; public
+publication, a distribution license, real-device Windows/macOS checks, successful
+live tool-call/embedding models, and target-developer validation remain open.
+[Release evidence](docs/readiness-release.md) distinguishes the implemented code,
+synthetic tests, real runtime observations, and pending gates.
+
+The CPU result covers one laptop, two small GGUF models, and synthetic fixed-token benchmark inputs. The one-core observation needs more paired runs on a quiet machine and another device. For this independent research track, the next technical milestone is a repeatable **whole-model** gain against a tuned baseline before considering engine integration or distribution. The CPU candidate remains opt-in and is not required to use V1. No public package, deployment, or commercial validation is established. A distribution license for this project has not been selected; the included llama.cpp code retains its upstream MIT notice in `engine/LLAMA-LICENSE`.

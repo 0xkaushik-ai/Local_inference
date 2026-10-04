@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="devicebench-session" content="__SESSION_TOKEN__" />
+    <meta
+      name="description"
+      content="Check your local AI setup, understand model requirements, and test the features your app needs."
+    />
+    <title>DeviceBench — Your local AI workspace</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#workspace">Skip to workspace</a>
+    <header class="header">
+      <a class="brand" href="/" aria-label="DeviceBench home">
+        <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <path
+            d="M7 5H3v18h4M21 5h4v18h-4"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+          <path
+            class="brand-bars"
+            d="M10 19v-5m4 5V9m4 10V5"
+            stroke-width="2.5"
+          />
+        </svg>
+        <span>devicebench</span>
+      </a>
+      <span class="version">V1 preview</span>
+      <button class="help-button" id="help-open" type="button">
+        Help &amp; setup <span aria-hidden="true">↗</span>
+      </button>
+    </header>
+    <main id="workspace">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">YOUR LOCAL AI WORKSPACE</p>
+          <h1 id="page-title">Make your next<br />model decision clearer.</h1>
+          <p class="lede">
+            Check your setup, understand a model’s requirements, and test the
+            features your app needs. Start with your device.
+          </p>
+        </div>
+        <aside class="runtime-card" aria-label="Runtime connection">
+          <div class="connection-heading">
+            <span
+              class="connection-dot"
+              id="connection-dot"
+              aria-hidden="true"
+            ></span
+            ><strong id="connection-status">Checking connection</strong
+            ><span class="local-label">LOCAL</span>
+          </div>
+          <span id="endpoint">Loading your runtime…</span>
+          <p id="connection-summary" role="status">
+            Reading your local AI server.
+          </p>
+          <button class="text-button" id="connection-help" type="button">
+            Connection help <span aria-hidden="true">↗</span>
+          </button>
+        </aside>
+      </section>
+
+      <div class="section-heading">
+        <h2>Your tools</h2>
+        <span>Start with setup. Continue at your own pace.</span>
+      </div>
+      <nav class="tool-grid" aria-label="Readiness tools">
+        <button
+          class="tool-card selected"
+          data-tool="doctor"
+          aria-pressed="true"
+        >
+          <span class="tool-number">01 / SETUP</span
+          ><strong>Local AI Doctor <span aria-hidden="true">↗</span></strong>
+          <span class="tool-description"
+            >Find connection issues and see your installed models and
+            hardware.</span
+          ><span class="tool-note"
+            >Checks your setup without loading a model</span
+          >
+        </button>
+        <button class="tool-card" data-tool="inspect" aria-pressed="false">
+          <span class="tool-number">02 / MODEL</span
+          ><strong
+            >Model &amp; Context <span aria-hidden="true">↗</span></strong
+          >
+          <span class="tool-description"
+            >Explore context limits and estimated memory for an installed
+            model.</span
+          ><span class="tool-note"
+            >Understand requirements before integrating</span
+          >
+        </button>
+        <button class="tool-card" data-tool="compat" aria-pressed="false">
+          <span class="tool-number">03 / APP</span
+          ><strong>App Compatibility <span aria-hidden="true">↗</span></strong>
+          <span class="tool-description"
+            >Try streaming, structured JSON, tool calling, and embeddings.</span
+          ><span class="tool-note">Test only the features your app needs</span>
+        </button>
+      </nav>
+
+      <div class="workspace-grid">
+        <aside class="controls" aria-label="Check settings">
+          <form id="tool-form">
+            <div class="panel-heading">
+              <p class="eyebrow" id="step-label">STEP 01 / SETUP</p>
+              <h2 id="tool-heading">Local AI Doctor</h2>
+              <p id="tool-description" class="panel-description">
+                Check your connection, model inventory, and available hardware
+                information.
+              </p>
+            </div>
+            <label for="protocol">Server API</label>
+            <select id="protocol" aria-describedby="protocol-help">
+              <option value="ollama">Ollama native</option>
+              <option value="openai">OpenAI-compatible</option>
+            </select>
+            <p class="field-help" id="protocol-help">
+              Choose the API your local AI server provides.
+            </p>
+            <div id="model-controls" hidden>
+              <div class="label-row">
+                <label for="model">Installed model</label
+                ><button class="text-button" type="button" id="refresh">
+                  Refresh models
+                </button>
+              </div>
+              <select id="model" aria-describedby="model-help">
+                <option value="">Checking available models…</option>
+              </select>
+              <p class="field-help" id="model-help">
+                Models are managed by your local AI server.
+              </p>
+            </div>
+            <div id="context-controls" hidden>
+              <label for="context"
+                >Context length <span class="label-unit">tokens</span></label
+              >
+              <input
+                id="context"
+                type="number"
+                min="1"
+                max="1048576"
+                step="1"
+                value="4096"
+                aria-describedby="context-help"
+              />
+              <p class="field-help" id="context-help">
+                The space your app needs for input and output. This changes the
+                estimate, not your server settings.
+              </p>
+            </div>
+            <div id="app-controls" hidden>
+              <label for="app-preset">What are you building?</label>
+              <select id="app-preset" aria-describedby="preset-help">
+                <option value="custom">Choose my own checks</option>
+                <option value="chatbot">A streaming chatbot</option>
+                <option value="extraction">JSON data extraction</option>
+                <option value="assistant">An assistant that calls tools</option>
+                <option value="search">Semantic search</option>
+              </select>
+              <p class="field-help" id="preset-help">
+                A starting selection of API checks. You can adjust it below.
+              </p>
+            </div>
+            <fieldset id="feature-controls" hidden>
+              <legend>Features to check</legend>
+              <label class="check"
+                ><input
+                  type="checkbox"
+                  name="check"
+                  value="streaming"
+                  checked
+                /><span
+                  >Streaming<small>Receive a response in chunks</small></span
+                ></label
+              >
+              <label class="check"
+                ><input
+                  type="checkbox"
+                  name="check"
+                  value="json"
+                  checked
+                /><span
+                  >Structured JSON<small
+                    >Return data in a defined format</small
+                  ></span
+                ></label
+              >
+              <label class="check"
+                ><input type="checkbox" name="check" value="tools" /><span
+                  >Tool calling<small
+                    >Request a function with arguments</small
+                  ></span
+                ></label
+              >
+              <label class="check"
+                ><input type="checkbox" name="check" value="embeddings" /><span
+                  >Embeddings<small
+                    >Represent text as a numeric vector</small
+                  ></span
+                ></label
+              >
+              <div id="embedding-controls" hidden>
+                <label for="embedding-model">Embedding model</label
+                ><select id="embedding-model">
+                  <option value="">Use selected model</option>
+                </select>
+                <p class="field-help">
+                  Choose a separate embedding model if your app uses one.
+                </p>
+              </div>
+            </fieldset>
+            <button class="primary" id="run" type="submit">
+              Run diagnostics <span aria-hidden="true">→</span>
+            </button>
+            <p class="field-help request-note" id="request-note">
+              Reads local information. Does not install or load models.
+            </p>
+          </form>
+          <div class="scope-note">
+            <strong>Your reports, on your device.</strong>
+            <p>
+              Download a report to keep it. This workspace’s results clear when
+              you reload the page.
+            </p>
+          </div>
+        </aside>
+
+        <section class="results" aria-label="Check results">
+          <div class="results-header">
+            <div>
+              <p class="eyebrow">YOUR RESULTS</p>
+              <h2 id="result-title">Local AI Doctor</h2>
+            </div>
+            <div class="exports" aria-label="Download report">
+              <button
+                id="export-html"
+                disabled
+                aria-label="Download HTML report"
+              >
+                HTML <span aria-hidden="true">↓</span></button
+              ><button
+                id="export-json"
+                disabled
+                aria-label="Download JSON report"
+              >
+                JSON <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+          </div>
+          <p id="status" role="status" aria-live="polite">
+            Checking your local setup…
+          </p>
+          <p id="report-context" hidden></p>
+          <div id="error" role="alert" hidden></div>
+          <div id="outcome" class="outcome" hidden>
+            <h3 id="outcome-title"></h3>
+            <p id="outcome-description"></p>
+            <button
+              type="button"
+              id="next-step"
+              class="text-button"
+              hidden
+            ></button>
+          </div>
+          <div id="summary" class="summary" hidden></div>
+          <div id="findings">
+            <div class="empty">
+              <span class="empty-mark" aria-hidden="true">01</span>
+              <h3>Start with your setup.</h3>
+              <p>We’re checking your local AI server and available hardware.</p>
+            </div>
+          </div>
+          <details id="raw" hidden>
+            <summary>View complete report &amp; check limitations</summary>
+            <p id="report-scope" class="field-help"></p>
+            <pre
+              id="raw-json"
+              tabindex="0"
+              aria-label="Complete report JSON"
+            ></pre>
+          </details>
+          <p class="export-note" id="export-note" hidden>
+            HTML is ready to read; JSON is ready for your code. Reports include
+            device details, model names, and probe responses. Review before
+            sharing.
+          </p>
+        </section>
+      </div>
+
+      <section class="how-it-works" aria-labelledby="workflow-title">
+        <div>
+          <p class="eyebrow">A SIMPLE WORKFLOW</p>
+          <h2 id="workflow-title">From your setup to your next step.</h2>
+        </div>
+        <ol>
+          <li>
+            <strong>Diagnose</strong><span>Connect to your local runtime.</span>
+          </li>
+          <li>
+            <strong>Understand</strong
+            ><span>Inspect a model and its requirements.</span>
+          </li>
+          <li>
+            <strong>Verify &amp; save</strong
+            ><span>Test app features and download the evidence.</span>
+          </li>
+        </ol>
+      </section>
+      <footer>
+        <span
+          >devicebench <span class="footer-separator">/</span> Local AI
+          readiness</span
+        ><span
+          >V1 preview · Linux verified; Windows &amp; macOS validation
+          pending.</span
+        >
+      </footer>
+    </main>
+
+    <dialog id="help-dialog" aria-labelledby="help-title">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">GET STARTED</p>
+          <h2 id="help-title">Your local AI, connected.</h2>
+        </div>
+        <button type="button" id="help-close" aria-label="Close help">×</button>
+      </div>
+      <p>
+        DeviceBench runs on your computer and checks a local AI server. Keep its
+        terminal open while you use this workspace.
+      </p>
+      <ol class="help-steps">
+        <li>
+          <strong>Start your AI server</strong>
+          <p>
+            Start Ollama or an OpenAI-compatible local server. Install models
+            through that server, then run Local AI Doctor to refresh the list.
+          </p>
+        </li>
+        <li>
+          <strong>Choose the right connection</strong>
+          <p>
+            This workspace is using
+            <code id="help-endpoint">your configured endpoint</code>. Match the
+            Server API selection to your runtime.
+          </p>
+          <p>
+            To change the address, stop DeviceBench with Ctrl+C and launch it
+            again. From an environment where DeviceBench is installed:
+          </p>
+          <pre tabindex="0" aria-label="Ollama launch command">
+devicebench serve --endpoint http://127.0.0.1:11434</pre>
+          <p>For a local OpenAI-compatible server, use its actual port:</p>
+          <pre tabindex="0" aria-label="OpenAI-compatible launch example">
+devicebench serve --endpoint http://127.0.0.1:1234 --protocol openai</pre>
+          <p>
+            If running from source, use <code>python -m devicebench</code> in
+            place of <code>devicebench</code>, with your repository’s
+            <code>src</code> directory on <code>PYTHONPATH</code>.
+          </p>
+        </li>
+        <li>
+          <strong>Check only what you need</strong>
+          <p>
+            Doctor reads your setup. Model &amp; Context estimates requirements
+            where metadata is available. App Compatibility sends small test
+            requests and may load models. It checks tool-call output without
+            executing functions.
+          </p>
+        </li>
+        <li>
+          <strong>Keep your results</strong>
+          <p>
+            Download HTML for a readable report or JSON for further analysis.
+            Changing settings requires a new check; reports are matched to the
+            settings that produced them.
+          </p>
+        </li>
+      </ol>
+      <details>
+        <summary>Supported connections and preview limits</summary>
+        <p>
+          V1 supports HTTP servers on your own computer, without authentication.
+          Remote servers and authenticated endpoints are outside this preview.
+          Hardware information may be unavailable on some devices.
+        </p>
+        <p>
+          Linux has been tested locally. Windows and macOS validation is
+          pending. Estimates are guidance; compatibility results describe the
+          requests checked, not overall app quality.
+        </p>
+        <p id="deadline"></p>
+      </details>
+    </dialog>
+  </body>
+</html>

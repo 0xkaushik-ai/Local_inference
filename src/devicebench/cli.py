@@ -213,8 +213,17 @@ def import_captures(manifest_path, out):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["doctor", "run", "import"])
+    # Keep benchmark/import and explicit legacy backend diagnostics intact.
+    if len(sys.argv) > 1 and (
+        sys.argv[1] in ("inspect", "compat", "serve")
+        or sys.argv[1] == "doctor" and not any(arg == "--backend" or arg.startswith("--backend=") for arg in sys.argv[2:])
+    ):
+        from .readiness.cli import main as readiness_main
+
+        return readiness_main(sys.argv[1:])
+    parser = argparse.ArgumentParser(description="DeviceBench readiness toolkit and local benchmark runner", epilog="Readiness: doctor, inspect, compat, serve. Run devicebench <command> --help for tool options. Benchmark/import options below retain their original behavior.")
+    parser.add_argument("--version", action="version", version="0.2.0")
+    parser.add_argument("command", choices=["doctor", "inspect", "compat", "serve", "run", "import"])
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--backend", choices=["ollama", "runanywhere"], default="ollama")
     parser.add_argument("--bridge", type=Path, default=Path("build/runanywhere/devicebench-runanywhere"))

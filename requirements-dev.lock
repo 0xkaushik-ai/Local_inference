@@ -1,0 +1,8 @@
+# Exact development/build dependencies. The application has no runtime dependencies.
+setuptools==78.1.1
+wheel==0.45.1
+build==1.2.2.post1
+packaging==25.0
+pyproject-hooks==1.2.0
+ruff==0.11.13
+colorama==0.4.6; sys_platform == "win32"
