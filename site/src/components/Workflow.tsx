@@ -1,14 +1,26 @@
 import { useState } from 'react';
-import { ArrowUpRight, Check, ChevronRight, FileJson, FolderOpen, Terminal } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Check,
+  ChevronRight,
+  FileJson,
+  FolderOpen,
+  PanelsTopLeft,
+} from 'lucide-react';
 import { navigateTabs } from '../lib/tabs';
 
 const steps = [
   {
     title: 'Diagnose your setup',
     description:
-      'Start the local companion and open its dashboard. Local AI Doctor checks your server, lists installed models, and explains missing hardware information without loading a model.',
+      'Open DeviceBench. Its launcher starts the dashboard in your browser. Local AI Doctor checks your server, lists installed models, and explains missing hardware information without loading a model.',
     link: 'Set up the toolkit',
-    command: 'PYTHONPATH=src python3 -m devicebench doctor',
+    panel: 'Local AI Doctor',
+    fields: [
+      ['Open', 'Local AI Doctor'],
+      ['Action', 'Run Doctor'],
+      ['Review', 'Connection, models, hardware'],
+    ],
     lines: [
       'Check the local runtime',
       'Read the installed model inventory',
@@ -21,8 +33,12 @@ const steps = [
       'In the dashboard, select Model & Context Checker, choose an installed model, and set your context size. Review declared limits and memory estimates; missing data stays visible.',
     link: 'Read the model guide',
     guide: '#/docs/readiness-toolkit?section=model-and-context-checker',
-    command:
-      'PYTHONPATH=src python3 -m devicebench inspect \\\n  --model YOUR_INSTALLED_MODEL --context 4096',
+    panel: 'Model & Context Checker',
+    fields: [
+      ['Choose', 'An installed model'],
+      ['Set context', 'For example, 4096 tokens'],
+      ['Review', 'Limits and memory estimates'],
+    ],
     lines: [
       'Inspect identity and context limits',
       'Estimate supported memory layouts',
@@ -35,8 +51,12 @@ const steps = [
       'Choose App Compatibility Tester, select the features your app needs, and run the check. Read the findings for streaming, structured JSON, tool calling, or embeddings.',
     link: 'Read the compatibility guide',
     guide: '#/docs/readiness-toolkit?section=app-compatibility-tester',
-    command:
-      'PYTHONPATH=src python3 -m devicebench compat \\\n  --model YOUR_INSTALLED_MODEL --checks streaming json',
+    panel: 'App Compatibility Tester',
+    fields: [
+      ['Choose', 'Your model and app preset'],
+      ['Select checks', 'Only the features your app needs'],
+      ['Run', 'Read the observed responses'],
+    ],
     lines: [
       'Select only the features you need',
       'Use a separate embedding model if needed',
@@ -49,8 +69,12 @@ const steps = [
       'Download your findings as HTML or JSON from the dashboard. Read the observed responses and review device details before sharing with your team. Save reports before stopping the companion.',
     link: 'Read the export guide',
     guide: '#/docs/readiness-toolkit?section=statuses-reports-and-limits',
-    command:
-      'Your downloaded report\n\nreport.html  — readable findings\nreport.json  — structured evidence',
+    panel: 'Your report files',
+    fields: [
+      ['report.html', 'Readable, standalone findings'],
+      ['report.json', 'Structured evidence'],
+      ['Before sharing', 'Review machine and model details'],
+    ],
     lines: [
       'Readable, standalone HTML',
       'Structured findings and recorded assumptions',
@@ -122,16 +146,21 @@ export default function Workflow({ onStart }: { onStart: () => void }) {
               <i />
               <i />
             </span>
-            <span>devicebench / {active === 3 ? 'evidence' : 'terminal'}</span>
+            <span>devicebench / dashboard walkthrough</span>
           </div>
           <div className="workflow-terminal">
             <div className="terminal-label">
-              {active === 3 ? <FolderOpen size={19} /> : <Terminal size={19} />}
-              <span>
-                {active === 3 ? 'Your report files' : 'Optional CLI command from the source folder'}
-              </span>
+              {active === 3 ? <FolderOpen size={19} /> : <PanelsTopLeft size={19} />}
+              <span>{selected.panel}</span>
             </div>
-            <pre>{selected.command}</pre>
+            <dl className="workflow-fields">
+              {selected.fields.map(([label, value]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
             {selected.lines.map((line) => (
               <div className="terminal-check" key={line}>
                 <Check size={14} />
@@ -142,8 +171,8 @@ export default function Workflow({ onStart }: { onStart: () => void }) {
           <div className="workflow-file">
             <FileJson size={18} />
             <span>
-              Use the dashboard or the CLI
-              <small>The same checks. HTML and JSON reports.</small>
+              Your checks stay on your computer
+              <small>Save HTML and JSON reports before quitting.</small>
             </span>
             <Check size={15} />
           </div>

@@ -334,9 +334,9 @@
         </div>
         <button type="button" id="help-close" aria-label="Close help">×</button>
       </div>
-      <p>
-        DeviceBench runs on your computer and checks a local AI server. Keep its
-        terminal open while you use this workspace.
+      <p id="help-session">
+        DeviceBench runs on your computer and checks a local AI server. Keep
+        DeviceBench running while you use this workspace.
       </p>
       <ol class="help-steps">
         <li>
@@ -353,20 +353,39 @@
             <code id="help-endpoint">your configured endpoint</code>. Match the
             Server API selection to your runtime.
           </p>
-          <p>
-            To change the address, stop DeviceBench with Ctrl+C and launch it
-            again. From an environment where DeviceBench is installed:
-          </p>
-          <pre tabindex="0" aria-label="Ollama launch command">
+          <div id="help-desktop" hidden>
+            <p>
+              In the DeviceBench launcher, set
+              <strong>AI server address</strong>, <strong>API protocol</strong>,
+              and <strong>Request timeout</strong>. Choose
+              <strong>Restart</strong> to apply changes, or
+              <strong>Start</strong> if the dashboard is stopped. The launcher
+              opens the updated workspace in your browser.
+            </p>
+            <p>
+              Use <strong>Open dashboard</strong> to reopen this workspace.
+              <strong>Stop</strong> closes the local dashboard;
+              <strong>Quit</strong> also closes the launcher. If a check is
+              running, you can confirm that DeviceBench should wait for it to
+              finish before stopping.
+            </p>
+          </div>
+          <div id="help-cli" hidden>
+            <p>
+              To change the address, stop DeviceBench with Ctrl+C and launch it
+              again. From an environment where DeviceBench is installed:
+            </p>
+            <pre tabindex="0" aria-label="Ollama launch command">
 devicebench serve --endpoint http://127.0.0.1:11434</pre>
-          <p>For a local OpenAI-compatible server, use its actual port:</p>
-          <pre tabindex="0" aria-label="OpenAI-compatible launch example">
+            <p>For a local OpenAI-compatible server, use its actual port:</p>
+            <pre tabindex="0" aria-label="OpenAI-compatible launch example">
 devicebench serve --endpoint http://127.0.0.1:1234 --protocol openai</pre>
-          <p>
-            If running from source, use <code>python -m devicebench</code> in
-            place of <code>devicebench</code>, with your repository’s
-            <code>src</code> directory on <code>PYTHONPATH</code>.
-          </p>
+            <p>
+              If running from source, use <code>python -m devicebench</code> in
+              place of <code>devicebench</code>, with your repository’s
+              <code>src</code> directory on <code>PYTHONPATH</code>.
+            </p>
+          </div>
         </li>
         <li>
           <strong>Check only what you need</strong>
@@ -383,6 +402,10 @@ devicebench serve --endpoint http://127.0.0.1:1234 --protocol openai</pre>
             Download HTML for a readable report or JSON for further analysis.
             Changing settings requires a new check; reports are matched to the
             settings that produced them.
+          </p>
+          <p>
+            Reports are temporary. Download any you want to keep before
+            reloading this page, restarting DeviceBench, or quitting.
           </p>
         </li>
       </ol>

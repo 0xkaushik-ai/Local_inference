@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 
 test('readiness examples remain labeled and export the selected findings', async ({ page }) => {
   const errors: string[] = [];
@@ -31,7 +32,7 @@ test('readiness examples remain labeled and export the selected findings', async
   expect(errors).toEqual([]);
 });
 
-test('setup switches platform and runtime, copies launch commands, and restores focus', async ({
+test('developer setup switches platform and runtime, copies commands, and restores focus', async ({
   page,
   context,
 }) => {
@@ -40,11 +41,13 @@ test('setup switches platform and runtime, copies launch commands, and restores 
   const trigger = page.getByRole('button', { name: 'Get started' }).first();
   await trigger.click();
   await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByText('Developer setup · source or Python package', { exact: true }).click();
   await expect(page.locator('.setup-code')).toContainText(
     'PYTHONPATH=src python3 -m devicebench serve',
   );
   await page.getByRole('tab', { name: 'Windows', exact: true }).click();
-  await expect(page.locator('.setup-requirements')).toContainText('not yet validated');
+  await expect(page.locator('.app-download')).toContainText('not yet validated');
+  await expect(page.getByRole('link', { name: 'Download Linux preview' })).toHaveCount(0);
   await expect(page.locator('.setup-code')).toContainText('$env:PYTHONPATH = "src"');
   await page.getByLabel('Your local AI server').selectOption('openai');
   await expect(page.locator('.setup-code')).toContainText(
@@ -71,9 +74,93 @@ test('clipboard denial leaves setup commands available to copy manually', async 
   });
   await page.goto('/');
   await page.getByRole('button', { name: 'Get started' }).first().click();
+  await page.getByText('Developer setup · source or Python package', { exact: true }).click();
   await page.getByRole('button', { name: 'Copy setup commands' }).click();
   await expect(page.getByRole('status')).toContainText('Select and copy');
   await expect(page.locator('.setup-code pre')).toContainText('devicebench serve');
+});
+
+test('a staged preview provides the application, checksum, and complete-folder instructions', async ({
+  page,
+}, testInfo) => {
+  const filename = 'devicebench-0.2.0-linux-x86_64.tgz';
+  const sha256 = 'a'.repeat(64);
+  await page.route('**/downloads/manifest.json', (route) =>
+    route.fulfill({
+      json: {
+        platform: 'linux-x86_64',
+        status: 'local-preview',
+        version: '0.2.0',
+        filename,
+        bytes: 16000000,
+        sha256,
+        glibc: '2.42',
+      },
+    }),
+  );
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Get started' }).first().click();
+  await expect(page.getByRole('link', { name: 'Download Linux preview' })).toHaveAttribute(
+    'href',
+    `/downloads/${filename}`,
+  );
+  await expect(page.locator('.download-steps')).toContainText('Extract the complete folder');
+  await expect(page.locator('.download-requirements')).toContainText('glibc 2.42');
+  await expect(page.locator('.setup-code')).not.toBeVisible();
+  await page.getByText('Verify your download', { exact: true }).click();
+  await expect(page.locator('.download-verification code')).toHaveText(sha256);
+  await expect(page.getByRole('link', { name: 'Download checksum' })).toHaveAttribute(
+    'href',
+    `/downloads/${filename}.sha256`,
+  );
+  await page.screenshot({ path: testInfo.outputPath('desktop-download.png') });
+  await page.getByRole('tab', { name: 'macOS', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'macOS application pending' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download Linux preview' })).toHaveCount(0);
+  await expect(page.locator('.download-steps')).toHaveCount(0);
+});
+
+test('missing or invalid download metadata shows an honest fallback', async ({ page }) => {
+  for (const response of [
+    { status: 404, body: 'Not found' },
+    {
+      json: {
+        platform: 'linux-x86_64',
+        status: 'local-preview',
+        version: '0.2.0',
+        filename: '../../bad-file',
+        bytes: 100,
+        sha256: 'a'.repeat(64),
+        glibc: '2.42',
+      },
+    },
+  ]) {
+    await page.route('**/downloads/manifest.json', (route) => route.fulfill(response));
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Get started' }).first().click();
+    await expect(
+      page.getByRole('heading', { name: 'Application download not available here' }),
+    ).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Download Linux preview' })).toHaveCount(0);
+    await expect(page.locator('.download-steps')).toHaveCount(0);
+    await page.unrouteAll();
+  }
+});
+
+test('the staged application downloads with the exact archive bytes', async ({ page, request }) => {
+  const response = await request.get('/downloads/manifest.json');
+  const manifest = await response.json().catch(() => null);
+  test.skip(!manifest, 'Build and stage the application to verify its actual download.');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Get started' }).first().click();
+  const event = page.waitForEvent('download');
+  await page.getByRole('link', { name: 'Download Linux preview' }).click();
+  const download = await event;
+  const bytes = await readFile((await download.path())!);
+  expect(download.suggestedFilename()).toBe(manifest.filename);
+  expect(bytes.length).toBe(manifest.bytes);
+  expect(createHash('sha256').update(bytes).digest('hex')).toBe(manifest.sha256);
+  expect(bytes.subarray(0, 2)).toEqual(Buffer.from([0x1f, 0x8b]));
 });
 
 test('workflow controls change the explanation and file preview', async ({ page }) => {
@@ -89,7 +176,7 @@ test('workflow controls change the explanation and file preview', async ({ page 
     'aria-selected',
     'true',
   );
-  await expect(page.locator('#workflow-panel')).toContainText('--context 4096');
+  await expect(page.locator('#workflow-panel')).toContainText('4096 tokens');
 });
 
 test('desktop page renders without horizontal overflow', async ({ page }, testInfo) => {
@@ -110,7 +197,7 @@ test('Tools navigation reaches the local toolkit and opens setup', async ({ page
   ).toBeVisible();
   await page.getByRole('button', { name: 'Set up the local toolkit' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.locator('.setup-code pre')).toContainText('devicebench serve');
+  await expect(page.getByRole('heading', { name: 'Download. Open. Check.' })).toBeVisible();
 });
 
 test('mobile navigation, report views, and setup remain usable', async ({ page }, testInfo) => {
@@ -139,6 +226,7 @@ test('mobile navigation, report views, and setup remain usable', async ({ page }
   await page.setViewportSize({ width: 320, height: 750 });
   await page.getByRole('button', { name: 'Get started' }).first().click();
   await expect(page.getByRole('dialog')).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('mobile-download.png') });
   expect(
     await page
       .getByRole('dialog')

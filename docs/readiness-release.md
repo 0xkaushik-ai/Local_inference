@@ -19,10 +19,62 @@ separate; V1 makes no inference speed claim.
   settings, inspectable evidence, and HTML/JSON downloads.
 - Installable dependency-free Python wheel with bundled dashboard resources,
   source archive, pinned development tools, and fresh-install verification.
-- Website toolkit section/setup commands and CI configuration for Linux,
+- Portable Linux application with bundled Python/Tk/dashboard, native launcher,
+  connection settings, browser opening, occupied-port fallback, and graceful shutdown.
+- Website application downloads when an artifact is staged, optional developer
+  setup, and CI configuration for Linux,
   Windows, and macOS on Python 3.11 and 3.13.
 
-## Customer-facing V1 alignment verification
+## Application distribution alignment — 2026-10-05
+
+This work follows commit `773a71e` ("Prepare DeviceBench V1 toolkit and customer
+experience"). The three-tool V1 scope is unchanged. The customer entry point is
+now **download → extract the complete folder → open DeviceBench → run checks**.
+Python/source installation remains an optional developer path.
+
+| Check | Observed result |
+| --- | --- |
+| Python regression suite | 78 passing tests, including launcher lifecycle, occupied ports, active-check shutdown, HTTP/session protection, and frozen-process environment handling |
+| Website browser suite | 17 passing Chromium tests with the candidate staged; includes real download bytes/checksum, unavailable/invalid download metadata, platform availability, optional CLI setup, documentation, keyboard, responsive layout, and axe checks |
+| Toolkit browser suite | 11 passing Chromium tests against an isolated synthetic runtime |
+| Code and website checks | Ruff lint/format, ESLint, Prettier, TypeScript/Vite production build, and diff whitespace checks passed |
+| Relocated archive | Exact archive extracted into a temporary directory; version, assets, local HTTP, and session protection passed with an empty PATH and Python environment overrides removed |
+| Frozen GUI | Bundled Tcl/Tk started from a separate copied folder under Xvfb; actual browser-helper dispatch, endpoint edit, Restart, Open dashboard, Stop, Start, Quit, port fallback, and cleanup passed |
+| Frozen tool workflow | Doctor, model/context inspection, all four compatibility probes, desktop Help, HTML export, and JSON export passed against a synthetic runtime |
+| Browser delivery | Download through the local website matched archive size and SHA-256; 320px download dialog checked without horizontal overflow |
+| Developer wheel | Fresh offline installation passed CLI, launcher self-test, dashboard assets, reports, and transport checks |
+
+The browser dispatch check executes a recording browser helper; it does not
+establish desktop-specific default-browser associations. Frozen tool results use
+synthetic responses and do not add live model compatibility claims to the older
+Ollama observations below. The existing local dashboard/runtime were preserved.
+
+Application artifact: `dist/devicebench-0.2.0-linux-x86_64.tgz`. It contains the
+complete `DeviceBench/` folder, including its launcher, Python/Tk resources,
+dashboard, and documentation. `dist/app-manifest.json` and the adjacent `.sha256`
+file identify the exact generated archive. Website staging copies those artifacts
+to `site/public/downloads/`; they are ignored by Git. The `.tgz` name avoids static
+servers treating a `.gz` suffix as HTTP content encoding and changing downloaded
+bytes. An automated browser regression verifies the saved bytes against the manifest.
+
+GUI-verified executable SHA-256:
+`f1383fb349780e1b69230407e9e722ae6c98700e22806c0716b06619ee37a398`.
+The current wheel is `dist/devicebench_local-0.2.0-py3-none-any.whl`, with verified
+SHA-256 `8c7105b92081cd3a0c28ecb9e260e100050e43707b8cf5550ff88d15b2354e0c`.
+Recompute artifact hashes after rebuilding. Archive hashes are generated metadata,
+not embedded in the archive's own documentation.
+
+Screenshots, synthetic exported reports, GUI evidence, and browser-download
+evidence are under `reports/app-preview/`. Automated browser evidence remains
+under `site/test-results/` and `reports/readiness-browser/`.
+
+This candidate was built and tested on Linux x86_64 with glibc 2.42 and Python
+3.13.12. It conservatively requires glibc 2.42 or newer and a graphical desktop;
+other distributions still need verification. It is an unpublished local preview,
+without signing or automatic updates. Application license selection and a full
+notice audit for bundled Tcl/Tk/native libraries remain public-distribution gates.
+
+## Recorded V1 alignment at commit 773a71e
 
 This pass aligns the product website, local dashboard, and documentation around
 the three existing V1 tools. The development package remains `0.2.0`.
@@ -48,10 +100,10 @@ it does not establish tool-calling, embedding, or extraction-quality performance
 Standalone HTML and print examples are under `reports/readiness-export-review/`.
 The source archive includes the installation, support, and workflow documentation.
 
-Current wheel: `dist/devicebench_local-0.2.0-py3-none-any.whl`.
-Verified SHA-256:
+Wheel recorded for that earlier alignment: `dist/devicebench_local-0.2.0-py3-none-any.whl`.
+Its historical SHA-256 was:
 `2c4ce80994227cd7074a68a8bf84b57fbad4ac8e06bb2248e8cbfb088c0e65ab`.
-This identifies the local candidate, not a published release. Recompute the hash
+This identifies the earlier local candidate, not the current rebuild or a published release. Recompute the hash
 after any rebuild; archive timestamps can change the artifact bytes.
 
 ## Recorded verification before the customer-facing alignment pass
@@ -90,6 +142,8 @@ Build artifacts are under `dist/`; those directories are ignored by Git. Use
 
 - Select the project's distribution license before public distribution. A model's
   recorded license is a separate matter; the application does not interpret it.
+- Complete bundled third-party notices, signing/authenticity decisions, and
+  customer installation checks on clean supported desktop environments.
 - Run the configured Windows/macOS CI jobs and test supported hardware/runtime
   combinations on actual devices. CI configuration alone is not execution evidence.
 - Validate usefulness with target developers using their real app integration.
@@ -106,6 +160,7 @@ Build artifacts are under `dist/`; those directories are ignored by Git. Use
 ## Reproduce
 
 Follow [README development/build commands](../README.md#install-develop-and-build).
+For the application archive, follow the [app build and verification guide](development.md#build-and-check-the-desktop-app).
 For browser validation from `site/`:
 
 ```sh

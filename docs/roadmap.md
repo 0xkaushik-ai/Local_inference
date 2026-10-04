@@ -1,8 +1,8 @@
 # Project roadmap
 
 This is the scope and launch checklist for **DeviceBench V1**. All three readiness
-tools, their local dashboard, CLI, reports, and setup documentation belong to this
-first public release. `0.2.0` identifies the current development package; it does
+tools, their local dashboard, desktop launcher, CLI, reports, and setup
+documentation belong to this first public release. `0.2.0` identifies the current development package; it does
 not describe a separate customer release.
 
 The V1 promise is: **check your local AI setup, understand model requirements,
@@ -17,9 +17,10 @@ validation and pending work are kept separate in the [release record](readiness-
 | Model & Context Checker | Metadata, declared context checks, conservative memory estimates | Selected dense architectures only; estimates are not measured fit |
 | App Compatibility Tester | Streaming, JSON, tools, and embeddings probes; editable app presets | Small API probes; successful real tool/embedding models need verification |
 | Local companion | Three tools, setup help, next-step guidance, results matched to active settings, HTML/JSON downloads | Loopback only; browser reports clear on reload; up to 16 temporary server reports |
+| Desktop app candidate | Bundled Python/dashboard, automatic local launch, browser opening, connection settings, stop/quit controls | Requires Linux x86_64 desktop and glibc 2.42+; other distributions unvalidated, Windows/macOS app downloads unavailable |
 | Benchmark runner | Ollama and RunAnywhere adapters, prompt suites, repeat/warm-up controls, evidence export/import | Limited workload and platform validation |
 | Website and documentation | React product website, illustrative report, setup instructions, bundled documentation | Does not run inference or inspect visitors' hardware |
-| Packaging and CI | Local wheel/source build, install check, cross-platform CI configuration | Publication and cross-platform execution remain pending |
+| Packaging and CI | App archive for the website download flow, local wheel/source build, artifact checks, cross-platform Python CI configuration | Website downloads require generated artifacts; publication and cross-platform execution remain pending |
 | CPU research | Pinned llama.cpp patch, correctness fixtures, paired experiments, text demo | Opt-in; tuned whole-model speed target unmet |
 
 ## V1 launch checklist
@@ -27,27 +28,34 @@ validation and pending work are kept separate in the [release record](readiness-
 The release owner should record evidence for each item before advertising it as
 complete. These are V1 completion tasks, not a new feature release.
 
-1. **Validate the customer journey.** From a clean environment, install the exact
-   release artifact, connect a runtime, run all three tools, and download/open
-   both report formats. Check unavailable runtimes, empty inventories, unsupported
-   features, keyboard use, and narrow screens as well as the successful path.
+1. **Validate the customer journey.** From a clean environment without development
+   tools, download and extract the exact app artifact, launch it, connect a runtime,
+   run all three tools, and download/open both report formats. Check unavailable
+   runtimes, empty inventories, unsupported
+   features, keyboard use, narrow screens, reopening the dashboard, stopping/quitting,
+   replacing the app, and removing it as well as the successful path.
 2. **Confirm the advertised platform scope.** Execute the configured CI and test
    supported hardware/runtime combinations on real devices. Windows/macOS remain
-   unvalidated until that evidence exists; a Linux-first launch must say so.
+   unvalidated until that evidence exists; app builds are not yet available for
+   those systems. Validate supported Linux distributions and system-library
+   baselines; the current candidate requires glibc 2.42+ and does not cover older systems.
 3. **Complete live feature coverage.** Retain successful streaming, JSON,
    tool-calling, and embedding results with model/runtime identities. Successful
    real tool-call and embedding models are still pending; fixtures alone do not
    establish model compatibility.
 4. **Prepare public distribution.** Select the application license, choose the
-   public repository/download destination and contact path, build the final wheel
-   and source archive, verify installation, and record their hashes. Replace
-   preview wording and installation placeholders only when the release exists.
+   public download destination and contact path, build the final customer app
+   archive and optional developer wheel/source archive, verify their contents and
+   operation, and record their hashes. Document authenticity/signing status and
+   the manual update/removal process. Ensure the website includes actual artifacts
+   before offering a download. Replace preview wording and installation
+   placeholders only when the release exists.
 5. **Try V1 with target developers.** Observe a few users installing it and
    answering a real integration question. Resolve blocking confusion, record known
    limitations, and publish the agreed artifact with its setup and support scope.
 
-No public release is recorded yet. Source changes, a local wheel, configured CI,
-and a passing fixture suite each provide different evidence.
+No public release is recorded yet. Source changes, local app/wheel artifacts,
+configured CI, and a passing fixture suite each provide different evidence.
 
 ## Deferred benchmark work
 

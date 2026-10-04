@@ -116,7 +116,12 @@ def make_server(client, protocol="ollama", port=8766):
             if self.path == "/api/config":
                 return self.json(
                     200,
-                    {"endpoint": client.endpoint, "protocol": protocol, "timeout": client.timeout},
+                    {
+                        "endpoint": client.endpoint,
+                        "protocol": protocol,
+                        "timeout": client.timeout,
+                        "launch_mode": getattr(self.server, "launch_mode", "cli"),
+                    },
                 )
             if urlsplit(self.path).path == "/api/export":
                 if not self.allowed(require_token=True):
@@ -172,6 +177,10 @@ def make_server(client, protocol="ollama", port=8766):
             if not lock.acquire(blocking=False):
                 return self.json(409, {"error": "Another check is running. Wait for it to finish."})
             try:
+                if not self.server.accept_checks:
+                    return self.json(
+                        503, {"error": "DeviceBench is stopping. Wait for the launcher."}
+                    )
                 selected_protocol = data.get("protocol", protocol)
                 if data["tool"] == "doctor":
                     result = doctor(client, selected_protocol)
@@ -201,6 +210,8 @@ def make_server(client, protocol="ollama", port=8766):
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     server.daemon_threads = True
     server.reports = {}
+    server.check_lock = lock
+    server.accept_checks = True
     return server
 
 

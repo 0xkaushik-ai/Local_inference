@@ -6,8 +6,9 @@ your app requires, and save a report you can inspect or share.
 
 **V1 preview:** three tools, one local dashboard, and a matching CLI. The current
 development package is `0.2.0`; all three tools belong to the first public V1.
-Linux has recorded live validation. Public package publication and Windows/macOS
-validation remain pending; see the [V1 launch checklist](docs/roadmap.md#v1-launch-checklist).
+Linux has recorded live validation. A bundled Linux desktop app is the customer
+preview path; public publication and Windows/macOS app downloads remain pending.
+See the [V1 launch checklist](docs/roadmap.md#v1-launch-checklist).
 
 | Tool | The question it helps answer |
 | --- | --- |
@@ -35,6 +36,26 @@ are deferred.
 
 ## Try the V1 preview
 
+On the product website, open **Get started** and download the Linux app when the
+download is available. Extract the complete `devicebench-0.2.0-linux-x86_64.tgz`
+archive, open its `DeviceBench` folder, and run the `DeviceBench` application.
+Python and the local dashboard are included; customers do not need GitHub, Python,
+Node.js, or a source build. Keep the application together with its bundled files.
+
+The launcher starts the local service and opens the dashboard in your browser.
+Use its controls to reopen the dashboard, stop the service, or quit. Configure
+the local AI server's endpoint and API protocol in the launcher. Ollama or another
+supported local AI runtime and its models are installed separately.
+
+This is a local Linux x86_64 desktop candidate requiring glibc 2.42 or newer.
+Compatibility with other Linux distributions remains unverified; older system
+libraries are outside this candidate's support scope. There are no Windows/macOS
+app downloads, signing, or automatic updates yet. A website build without the generated archive displays the download as
+unavailable; no public release is established. See the
+[quickstart](docs/quickstart.md) for the full customer workflow and preview limits.
+
+### Developer preview from source
+
 With Python 3.11+ and this source checkout, run from the repository root:
 
 ```sh
@@ -59,7 +80,8 @@ PYTHONPATH=src python3 -m devicebench inspect --model YOUR_INSTALLED_MODEL --con
 PYTHONPATH=src python3 -m devicebench compat --model YOUR_INSTALLED_MODEL --checks streaming json
 ```
 
-Python 3.11+; no third-party runtime dependencies. Readiness supports native
+Source and wheel installations require Python 3.11+; the downloaded app bundles
+its own Python. The readiness checks have no third-party runtime dependencies and support native
 Ollama and unauthenticated local OpenAI-compatible APIs with capability-based
 fallbacks. Linux is the first live-validated platform. Windows/macOS are
 implemented with graceful hardware fallbacks and covered by a CI configuration;
@@ -81,10 +103,12 @@ python3 -m venv .venv
 ```
 
 On Windows use `python`, `.venv\Scripts\python.exe`, and the corresponding
-`.venv\Scripts\` executables. End-user installation needs only the built wheel:
+`.venv\Scripts\` executables. Developers can also install a built wheel:
 `python -m pip install dist/devicebench_local-0.2.0-py3-none-any.whl`.
 This command installs an artifact you built or received locally; a public package
-download is not established. `requirements.lock` records zero third-party runtime dependencies;
+registry release is not established. For the bundled app build, see
+[application packaging](docs/development.md#build-and-check-the-desktop-app).
+`requirements.lock` records zero third-party readiness runtime dependencies;
 `requirements-dev.lock` pins the formatter, linter, and build tools. Ruff covers
 the new toolkit and its tests; legacy benchmark formatting is preserved.
 

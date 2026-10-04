@@ -5,16 +5,40 @@ Check your setup, inspect a model and context size, and test the features your a
 uses. The Python CLI runs the same checks. This preview uses development package
 `0.2.0`; public release gates are tracked in the [V1 roadmap](roadmap.md).
 
-For source launch, Windows commands, first-run instructions, and troubleshooting,
+For the app download, first-run instructions, developer setup, and troubleshooting,
 start with the [quickstart](quickstart.md). The [support matrix](overview.md#runtime-support)
 distinguishes readiness, benchmark, and research adapters.
 
 ## Install and launch
 
-Python 3.11+ is required. No third-party Python runtime dependency, Node.js,
-curl, model download, or account is needed for the readiness tools themselves.
-If you have a locally built wheel, install it into a virtual environment. A
-public package release is not established; see [build instructions](development.md#build-and-check-a-package):
+Use the website's available Linux preview download, extract its complete
+`DeviceBench` folder, and open the `DeviceBench` application. Python and the
+dashboard are bundled; no GitHub checkout, Python installation, or build step is
+needed. The local candidate requires a Linux x86_64 desktop with glibc 2.42 or
+newer. Other distributions remain unvalidated, and Windows/macOS app downloads
+are not available. Websites without the generated archive display an unavailable
+download state. Public distribution is still pending.
+
+The launcher starts the local service and opens its browser dashboard. Use **Open
+dashboard** to return to it, **Stop** to stop the service, and **Quit** to exit.
+Keep the launcher open while running checks. Closing a browser tab does not stop
+the application. If port 8766 is occupied, the launcher chooses another free local
+port; use the address it opens. For manual replacement/removal instructions,
+see the [customer quickstart](quickstart.md#download-and-open-the-app).
+
+Install and start your AI runtime and models separately. DeviceBench does not
+download them. No account is required. Set the runtime address and API protocol
+in the launcher, then use **Restart** to apply changes. Save reports first;
+restarting clears the temporary report store. Request timeout is also configurable
+in the launcher, from 1 to 120 seconds.
+
+### Developer installation
+
+The source and wheel alternatives require Python 3.11+. The readiness checks use
+only the standard library; Node.js and curl are not required for those checks.
+If you have a locally built wheel, install it into a virtual environment. A public
+package registry release is not established; see
+[build instructions](development.md#build-and-check-a-package):
 
 ```sh
 python3 -m venv .venv
@@ -44,8 +68,9 @@ prefixes are outside V1. OpenAI-compatible is a wire protocol, not a claim that
 every provider, model, or feature has been validated.
 
 Open **Help & setup** in the dashboard for launch commands, connection guidance,
-and the preview's support limits. Changing the endpoint requires restarting the
-companion with `--endpoint`; selecting an API protocol uses the configured address.
+and the preview's support limits. In the app, change the endpoint in its launcher
+and restart. With a source/wheel server, restart the companion with `--endpoint`;
+selecting an API protocol in the dashboard uses the configured address.
 
 ## Local AI Doctor
 

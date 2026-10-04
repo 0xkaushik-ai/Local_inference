@@ -41,7 +41,7 @@ const questions = [
   {
     question: 'Where do the tools run?',
     answer:
-      'On your computer. Start the Python companion to use the three readiness tools in a local dashboard, or use the CLI. This website explains the product and shows sample reports. Your device is checked only by the companion you run locally.',
+      'On your computer. Open the DeviceBench application to start the local dashboard. The Linux preview bundles Python; your AI server and models are installed separately. This website explains the product and shows sample reports. Checks run only when you use the local application.',
   },
   {
     question: 'Which runtimes are supported?',
@@ -61,7 +61,7 @@ const questions = [
   {
     question: 'What is the current release status?',
     answer:
-      'This is the V1 preview, currently available through the source setup. Linux has recorded live validation. Windows/macOS validation, a distribution license, and public package publishing are still pending. The internal Python package version is 0.2.0.',
+      'This is the V1 preview, version 0.2.0. Open Get started for available downloads and system requirements. The Linux x64 application has been verified on the build workstation. Windows/macOS applications, wider Linux validation, a distribution license, signing, and public publishing are pending.',
   },
 ];
 

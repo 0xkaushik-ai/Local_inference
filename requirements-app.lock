@@ -1,0 +1,6 @@
+# Linux application build dependencies; no change to Python runtime requirements.
+setuptools==78.1.1
+packaging==25.0
+altgraph==0.17.5
+pyinstaller==6.22.3
+pyinstaller-hooks-contrib==2026.8

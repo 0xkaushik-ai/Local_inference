@@ -12,8 +12,8 @@ export default function Toolkit({ onStart }: { onStart: () => void }) {
         One clearer starting point.
       </h2>
       <p>
-        Three tools run locally through the same CLI and dashboard. Start with Ollama, or test a
-        local OpenAI-compatible API.
+        Three tools share one local dashboard. Start with Ollama, or test a local OpenAI-compatible
+        API.
       </p>
       <div className="feature-grid">
         {[
@@ -60,8 +60,8 @@ export default function Toolkit({ onStart }: { onStart: () => void }) {
         ))}
       </div>
       <p>
-        Requires Python 3.11+ and a separately installed runtime. Linux is verified; Windows and
-        macOS validation is pending.
+        Use the Linux application preview with your existing AI server and models. Python is
+        bundled. Windows and macOS applications are pending; developer setup is also available.
       </p>
       <button className="button dark" onClick={onStart}>
         Set up the local toolkit <ArrowUpRight size={15} />

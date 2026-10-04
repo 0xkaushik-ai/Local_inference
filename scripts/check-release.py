@@ -21,6 +21,7 @@ def main():
             f"devicebench/readiness/web/{name}"
             for name in ("index.html", "styles.css", "app.js", "favicon.svg")
         }
+        required.add("devicebench/launcher.py")
         if required - names:
             raise SystemExit(f"Wheel is missing dashboard assets: {sorted(required - names)}")
         if any(name.startswith((".cache/", "reports/", "site/node_modules/")) for name in names):
@@ -40,6 +41,12 @@ def main():
         )
         subprocess.run(
             [str(binary), "-I", "-m", "devicebench", "--version"],
+            cwd=root,
+            env=environment,
+            check=True,
+        )
+        subprocess.run(
+            [str(binary), "-I", "-m", "devicebench.launcher", "--self-test"],
             cwd=root,
             env=environment,
             check=True,

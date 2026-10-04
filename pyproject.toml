@@ -11,6 +11,7 @@ dependencies = []
 
 [project.scripts]
 devicebench = "devicebench.cli:main"
+devicebench-app = "devicebench.launcher:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -21,7 +22,7 @@ where = ["src"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
-include = ["src/devicebench/readiness/**/*.py", "tests/test_readiness*.py", "tests/readiness_fixture.py", "scripts/check-release.py"]
+include = ["src/devicebench/readiness/**/*.py", "src/devicebench/launcher.py", "tests/test_launcher.py", "tests/test_readiness*.py", "tests/readiness_fixture.py", "scripts/build-app.py", "scripts/check-app.py", "scripts/app-entry.py", "scripts/check-release.py"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F"]

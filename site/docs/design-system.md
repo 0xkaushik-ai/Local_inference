@@ -29,6 +29,12 @@ editorial visual identity and accurate descriptions of its capabilities.
 - Native dialog semantics contain keyboard focus. Escape dismisses website setup
   and dashboard Help, returning focus to the trigger. Website copy failures leave
   the command available for manual selection.
+- Setup leads with the available app download and the steps to extract, open,
+  and run checks. Show platform requirements and preview status beside the action.
+  Only show a download link when valid artifact metadata is available; unsupported
+  platforms and missing artifacts get explicit availability text. Keep source
+  commands inside the developer setup disclosure. Never substitute a repository
+  link for an application download.
 - The mobile navigation is a disclosure. Escape returns focus to its toggle, an
   outside click closes it, and switching to the desktop layout resets it.
 - Visible focus rings and reduced-motion preferences apply throughout. Statuses
@@ -69,6 +75,12 @@ three readiness reports and their next steps. Benchmarks and CPU research belong
 in advanced documentation; benchmark controls are deferred. Every tool has a guide;
 installation, support scope, report semantics, and V1 preview status are accessible
 through local documentation.
+
+The customer app bundles Python and the dashboard. Its launcher opens the local
+workspace and provides connection and lifecycle controls. The AI runtime/models
+remain separate prerequisites. Describe this candidate as a portable Linux
+preview with manual updates; public availability, signing, other Linux systems,
+and Windows/macOS apps require their own release evidence.
 
 The documentation reader uses the same type and color tokens, a restrained sidebar,
 readable prose, horizontally scrollable code/tables, and an optional desktop

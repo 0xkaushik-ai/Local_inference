@@ -50,6 +50,7 @@ const presets = {
 let activeTool = "doctor";
 let busy = false;
 let currentReport = null;
+let launchMode = null;
 const reports = new Map();
 
 function requestFor(tool) {
@@ -496,6 +497,13 @@ async function initialize() {
     if (!response.ok)
       throw new Error("Unable to load your workspace configuration.");
     const config = await response.json();
+    launchMode = config.launch_mode === "desktop" ? "desktop" : "cli";
+    $("help-desktop").hidden = launchMode !== "desktop";
+    $("help-cli").hidden = launchMode !== "cli";
+    $("help-session").textContent =
+      launchMode === "desktop"
+        ? "DeviceBench runs on your computer and checks a local AI server. Keep the launcher window open while you use this workspace."
+        : "DeviceBench runs on your computer and checks a local AI server. Keep its terminal open while you use this workspace.";
     $("endpoint").textContent = config.endpoint;
     $("help-endpoint").textContent = config.endpoint;
     $("deadline").textContent =
@@ -511,7 +519,11 @@ async function initialize() {
     $("connection-summary").textContent =
       "Restart DeviceBench and reload this page.";
     $("status").textContent =
-      "Workspace unavailable. Restart devicebench serve.";
+      launchMode === "desktop"
+        ? "Workspace unavailable. Use Restart in the DeviceBench launcher."
+        : launchMode === "cli"
+          ? "Workspace unavailable. Restart devicebench serve."
+          : "Workspace unavailable. Restart DeviceBench and reopen the dashboard.";
     $("error").textContent =
       error instanceof Error ? error.message : "Workspace unavailable.";
     $("error").hidden = false;

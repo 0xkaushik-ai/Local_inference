@@ -5,7 +5,8 @@ local AI readiness toolkit with three tools, a dashboard, CLI, and reports. The
 current development package is `0.2.0`. Existing benchmark and CPU research work
 is documented as an optional advanced track. Start with the
 [documentation overview](docs/overview.md) for a guide to every workflow and the
-[quickstart](docs/quickstart.md) for source, Windows, or local-wheel installation.
+[quickstart](docs/quickstart.md) for the Linux app candidate or optional developer
+source/wheel installation.
 The [roadmap](docs/roadmap.md) consolidates current scope and remaining work.
 
 ## Product and interfaces
@@ -15,10 +16,16 @@ features → export a report**. Tools are independently usable. Readiness checks
 share Python implementations between the CLI and local dashboard on port 8766.
 Benchmarks use the CLI. The React website on development port 8765 presents the
 product, illustrative readiness reports, and documentation bundled from repository
-Markdown. It does not inspect hardware or run inference.
+Markdown. It does not inspect hardware or run inference. The bundled desktop app
+starts the local service and opens its dashboard in the browser. Customers use
+the website's available download, extract the full app folder, and open
+`DeviceBench`; no Python installation, Git checkout, or rebuild is required.
+The launcher also exposes connection settings and stop/quit controls, and chooses
+a free port if 8766 is occupied. The AI runtime and its models remain separate.
 
 | Workflow | Entry point | Guide |
 | --- | --- | --- |
+| Downloaded app | Open `DeviceBench` inside the extracted Linux archive | [Customer quickstart](docs/quickstart.md#download-and-open-the-app) |
 | Local AI Doctor | `devicebench doctor` or local dashboard | [Doctor](docs/readiness-toolkit.md#local-ai-doctor) |
 | Model & Context Checker | `devicebench inspect` or local dashboard | [Model/context reference](docs/readiness-toolkit.md#model-and-context-checker) |
 | App Compatibility Tester | `devicebench compat` or local dashboard | [Compatibility reference](docs/readiness-toolkit.md#app-compatibility-tester) |
@@ -44,13 +51,14 @@ below remain separate workflows.
 | --- | --- | --- |
 | V1 readiness tools | Diagnoses local runtimes and hardware, estimates supported model/context memory, and probes selected app capabilities. | `src/devicebench/readiness/checks.py`, `hardware.py`, `transport.py` |
 | Local dashboard and reports | Runs the same checks as the CLI, explains findings, and downloads HTML/JSON reports. | `src/devicebench/readiness/server.py`, `report.py`, `web/` |
+| Desktop launcher and app bundle | Starts the companion and browser, configures its connection, and supplies Python/dashboard files in a Linux app archive. | `src/devicebench/launcher.py`, `scripts/build-app.py`, `scripts/check-app.py`, `requirements-app.lock` |
 | DeviceBench CLI | Runs a prompt suite through local Ollama or RunAnywhere, checks exact answers, and writes JSON, JSONL, and standalone HTML evidence. | `src/devicebench/cli.py`, `suites/smoke.json` |
 | RunAnywhere adapter | Calls the Linux x64 desktop kit's llama.cpp backend through a small C++ bridge. Records loading and generation separately. | `native/runanywhere.cpp`, `src/devicebench/runanywhere.py` |
 | CPU kernel experiment | Selects original or direct AVX-512/VNNI Q4_K arithmetic with `DEVICEBENCH_Q4K_VNNI`. It keeps the existing model format. | `engine/patches/q4k-vnni.patch` |
 | Engine benchmark and demo | Keeps a model resident for controlled token tests; the demo generates real text through the patched library. | `engine/bench.cpp`, `src/devicebench/engine_lab.py`, `engine/CMakeLists.txt` |
 | Verification | Tests evidence handling, kernel arithmetic, and full-vocabulary model outputs. | `tests/`, `engine/kernel_test.cpp` |
 
-Versioned download locations and SHA-256 values are in `engine/source-lock.json`, `engine/experiment-plan.json`, and `native/sdk-lock.json`. Downloaded models and SDKs live in `.cache/`; compiled binaries in `build/`; generated results in `reports/`. Those directories are ignored by Git. The current workspace has the downloads and builds; a fresh checkout needs the setup below.
+Native research download locations and SHA-256 values are in `engine/source-lock.json`, `engine/experiment-plan.json`, and `native/sdk-lock.json`. Downloaded models and SDKs live in `.cache/`; compiled binaries in `build/`; generated results in `reports/`. Those directories are ignored by Git. The current workspace has the downloads and builds; a fresh checkout needs the setup below for that research. App distribution is separate: build instructions are in [development](docs/development.md#build-and-check-the-desktop-app), and exact artifact verification belongs in [release evidence](docs/readiness-release.md).
 
 ## What the results show
 
@@ -62,7 +70,9 @@ The Ollama and RunAnywhere reports are functional smoke tests, not comparisons w
 
 ## Requirements
 
-Run commands from the repository root. The Python tools require Python 3.11+ and use the standard library. The native work was validated on Linux x64 with CMake 3.24+, a C++20 compiler, OpenMP, `patch`, `taskset`, `curl`, and SHA-256 tools. The RunAnywhere build also needs curl development headers and a library. The AVX-512 candidate requires a compatible CPU; a build for this machine is not portable to every CPU.
+For the customer app, use the Linux x86_64 archive and a separately installed AI runtime/model. It bundles Python and the dashboard; it does not require development tools. The candidate requires a graphical Linux desktop and glibc 2.42 or newer; compatibility with other Linux distributions remains unverified. Keep the full extracted folder together. Website downloads appear only when the generated archive and valid manifest are included in that website build.
+
+For developer and research commands below, run from the repository root. Source/wheel tools require Python 3.11+ and the readiness checks use the standard library. The native work was validated on Linux x64 with CMake 3.24+, a C++20 compiler, OpenMP, `patch`, `taskset`, `curl`, and SHA-256 tools. The RunAnywhere build also needs curl development headers and a library. The AVX-512 candidate requires a compatible CPU; a build for this machine is not portable to every CPU.
 
 ## Build and use the CPU engine experiment
 
@@ -132,10 +142,16 @@ Each CLI run creates `report.html`, `report.json`, and `runs.jsonl` in a new tim
 ## Current limits and next work
 
 For the entire project, follow the [consolidated roadmap](docs/roadmap.md).
-The V1 preview (development package `0.2.0`) has a locally built wheel and recorded Linux validation; public
-publication, a distribution license, real-device Windows/macOS checks, successful
+The V1 preview (development package `0.2.0`) has local app/wheel packaging and recorded Linux validation; public
+publication, a distribution license, broader Linux app compatibility, Windows/macOS
+app builds and real-device checks, successful
 live tool-call/embedding models, and target-developer validation remain open.
 [Release evidence](docs/readiness-release.md) distinguishes the implemented code,
 synthetic tests, real runtime observations, and pending gates.
+
+The archive is a local candidate, not a signed public installer. Automatic updates
+and system integration are not implemented. Users replace the extracted app
+manually and remove it by quitting and deleting its folder; downloaded reports
+remain wherever the user saved them.
 
 The CPU result covers one laptop, two small GGUF models, and synthetic fixed-token benchmark inputs. The one-core observation needs more paired runs on a quiet machine and another device. For this independent research track, the next technical milestone is a repeatable **whole-model** gain against a tuned baseline before considering engine integration or distribution. The CPU candidate remains opt-in and is not required to use V1. No public package, deployment, or commercial validation is established. A distribution license for this project has not been selected; the included llama.cpp code retains its upstream MIT notice in `engine/LLAMA-LICENSE`.

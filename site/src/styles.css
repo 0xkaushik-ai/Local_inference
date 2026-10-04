@@ -3209,3 +3209,117 @@ svg {
   flex-wrap: wrap;
   row-gap: 12px;
 }
+
+.app-download {
+  padding: 22px 0;
+  border-bottom: 1px solid var(--border);
+}
+.app-download h3 {
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+}
+.app-download p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+  margin-top: 10px;
+}
+.app-download .button {
+  margin-top: 18px;
+}
+.download-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.download-heading > span {
+  color: var(--muted);
+  font: 11px var(--mono);
+}
+.app-download .download-requirements {
+  font-size: 12px;
+}
+.download-verification {
+  margin-top: 14px;
+  font-size: 12px;
+}
+.download-verification summary,
+.developer-setup summary {
+  cursor: pointer;
+  padding-block: 9px;
+}
+.download-verification code {
+  display: block;
+  overflow-wrap: anywhere;
+  font: 11px/1.8 var(--mono);
+  margin-block: 10px;
+}
+.download-verification a,
+.developer-setup p a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.download-steps {
+  padding-left: 20px;
+  margin-block: 24px;
+}
+.download-steps li {
+  padding-left: 6px;
+  margin-bottom: 17px;
+  font-size: 14px;
+}
+.download-steps strong {
+  display: block;
+  font-weight: 500;
+}
+.download-steps span {
+  display: block;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.developer-setup {
+  border-block: 1px solid var(--border);
+  padding-block: 10px;
+  margin-bottom: 22px;
+}
+.developer-setup summary {
+  font-size: 14px;
+  font-weight: 500;
+}
+.developer-setup p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.developer-setup .setup-requirements {
+  margin-top: 8px;
+}
+.workflow-fields {
+  margin: 25px 0;
+}
+.workflow-fields > div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+.workflow-fields dt {
+  font: 11px/1.8 var(--mono);
+  color: var(--muted);
+}
+.workflow-fields dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+@media (max-width: 440px) {
+  .workflow-fields > div {
+    grid-template-columns: 85px minmax(0, 1fr);
+    gap: 10px;
+  }
+}

@@ -1,5 +1,7 @@
 include requirements.lock requirements-dev.lock AGENTS.md Documents.md
 include scripts/check-release.py
+include requirements-app.lock
+include scripts/build-app.py scripts/check-app.py scripts/app-entry.py
 recursive-include docs *.md
 recursive-include tests *.py
 recursive-include suites *.json

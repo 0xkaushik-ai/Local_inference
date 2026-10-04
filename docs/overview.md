@@ -6,12 +6,15 @@ an application. Run three tools in a browser on your computer: **Local AI Doctor
 findings, explanations, and an HTML or JSON report.
 
 This is the **V1 preview**. The development package is `0.2.0`; it is part of the
-same first public V1. Linux has recorded live validation. Public package
-publication and Windows/macOS validation remain pending.
+same first public V1. The local Linux app candidate bundles Python and the
+dashboard. It requires a Linux x86_64 desktop with glibc 2.42 or newer; broader
+distribution compatibility still needs validation. Public publication and
+Windows/macOS app downloads remain pending.
 
 ## Start here
 
-1. [Install and launch](quickstart.md) the local companion.
+1. [Download, extract, and open](quickstart.md#download-and-open-the-app) the local
+   app when its candidate download is available on the website.
 2. [Diagnose your runtime](readiness-toolkit.md#local-ai-doctor) with Local AI Doctor.
 3. [Check model and context requirements](readiness-toolkit.md#model-and-context-checker).
 4. [Test your app's required features](readiness-toolkit.md#app-compatibility-tester).
@@ -30,7 +33,7 @@ for launch.
 
 | Guide | What you will find |
 | --- | --- |
-| [Quickstart](quickstart.md) | Prerequisites, source and wheel installation, Windows commands, first report, troubleshooting |
+| [Quickstart](quickstart.md) | App download and launch, runtime setup, reports, update/removal, optional developer installation, troubleshooting |
 | [Readiness tools](readiness-toolkit.md) | Doctor, model/context estimates, streaming, JSON, tools, embeddings, statuses, limits |
 | [Benchmarks and evidence](benchmarks.md) | Prompt suites, repeats, warm-ups, measurements, exports, captured-result import |
 | [RunAnywhere](runanywhere.md) | Pinned Linux native bridge, build steps, timing boundaries |
@@ -45,20 +48,31 @@ for launch.
 
 | Interface | Address or command | Purpose |
 | --- | --- | --- |
-| Product website | `http://127.0.0.1:8765/` during development | Learn about the tools, read setup instructions and documentation |
-| Local dashboard | `http://127.0.0.1:8766/` after starting `devicebench serve` | Run readiness checks against your local runtime and download reports |
+| Product website | `http://127.0.0.1:8765/` during development | Learn about the tools, download an available candidate, read documentation |
+| Desktop launcher | Open `DeviceBench` in the extracted app folder | Start the companion, configure its connection, open its dashboard, stop or quit |
+| Local dashboard | Open from the launcher; normally `http://127.0.0.1:8766/` | Run readiness checks against your local runtime and download reports |
 | CLI | `devicebench doctor`, `inspect`, `compat`, `run`, `import` | Run checks, benchmark, and export evidence from a terminal |
 | CPU research | `python -m devicebench.engine_lab` after native setup | Separate experimental kernel evaluation |
 
 The website cannot inspect a visitor's machine or start the local companion.
-Website samples are labeled illustrative. Start the runtime and companion on your
-own computer to collect real observations.
+Website samples are labeled illustrative. Download availability depends on that
+website build including the verified archive and its manifest. There is no
+published public release yet. The app includes Python and its dashboard; customers
+do not need GitHub, Python installation, or rebuilding. Start the separately
+installed runtime and the app on your own computer to collect real observations.
 
-The companion runs while its terminal process is open. There is no account or
-hosted report storage. Download reports you want to keep; the companion retains
-up to 16 reports temporarily for HTML export, which are cleared when it stops.
+Keep the launcher open while using the app. Its **Open dashboard**, **Stop**, and
+**Quit** controls manage the local service; **Restart** applies connection changes.
+The launcher uses a free local port if 8766 is occupied. Source/wheel developers
+can still use `devicebench serve` and keep that terminal open instead.
+
+There is no account or hosted report storage. Download reports you want to keep;
+the companion retains up to 16 reports temporarily for HTML export, which are cleared when it stops.
 The browser shows the latest matching report per tool only until its page reloads.
 Use **Help & setup** in the dashboard for connection guidance and launch commands.
+The archive is a portable preview with manual replacement/removal, not a signed
+installer or an automatic updater. The [quickstart](quickstart.md) explains its
+lifecycle and the developer installation alternatives.
 
 ## Runtime support
 
