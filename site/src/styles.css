@@ -329,32 +329,47 @@ kbd {
   background: var(--paper-2);
 }
 
-/* Header */
+/* Header: a floating pill, centered and only as wide as its contents. The strip around it is
+   transparent and lets clicks through to the page. */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 30;
-  border-bottom: 1px solid var(--line);
-  background: var(--paper);
+  height: var(--header-height);
+  margin-bottom: calc(-1 * var(--header-height));
+  padding-top: 12px;
+  pointer-events: none;
   container: site-header / inline-size;
 }
 .nav-container {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 32px;
-  height: var(--header-height);
+  gap: 6px;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+  height: 56px;
+  margin: 0 auto;
+  padding: 0 8px 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: var(--shadow-md);
+  pointer-events: auto;
 }
 .main-nav {
   display: flex;
-  gap: 4px;
+  gap: 2px;
+  margin-left: 18px;
 }
 .main-nav a {
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  border-radius: 999px;
   color: var(--muted);
   font-size: 15px;
   font-weight: 500;
   text-decoration: none;
+  white-space: nowrap;
 }
 .main-nav a:hover {
   background: var(--paper-2);
@@ -363,15 +378,17 @@ kbd {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-left: auto;
+  gap: 6px;
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
 }
 .nav-github {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-radius: var(--radius-sm);
+  border-radius: 999px;
   color: var(--ink);
   font-size: 15px;
   font-weight: 500;
@@ -380,13 +397,19 @@ kbd {
 .nav-github:hover {
   background: var(--paper-2);
 }
+.nav-start {
+  border-radius: 999px;
+}
 .mobile-toggle {
   display: none;
+  border-radius: 999px;
 }
 
 /* Hero */
 .hero {
-  padding: 80px 0 96px;
+  position: relative;
+  padding: calc(var(--header-height) + 72px) 0 96px;
+  overflow: clip;
 }
 .hero-grid {
   display: grid;
@@ -455,8 +478,57 @@ kbd {
   box-shadow: 0 0 0 1px var(--yellow-edge);
 }
 
+/* Signal traces: a lazily loaded, decorative board behind the demo card */
+.demo-board {
+  position: relative;
+}
+.signal-field {
+  position: absolute;
+  inset: -960px;
+  display: none;
+  pointer-events: none;
+  mask-image: radial-gradient(closest-side, #000 52%, transparent 100%);
+}
+.signal-traces {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.signal-traces path {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.signal-traces circle {
+  fill: var(--paper);
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+}
+.trace-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--yellow);
+  box-shadow:
+    0 0 0 3px rgb(242 183 5 / 20%),
+    0 0 14px 3px rgb(242 183 5 / 50%);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+@media (min-width: 1081px) {
+  .signal-field {
+    display: block;
+  }
+}
+
 /* Fit demo */
 .fit-demo {
+  position: relative;
+  z-index: 1;
   padding: 26px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-lg);
@@ -2484,24 +2556,35 @@ details[open] .faq-icon::after {
   }
 }
 @media (max-width: 900px) {
+  .nav-container {
+    width: calc(100% - 24px);
+  }
+  .nav-actions {
+    margin-left: auto;
+    padding-left: 0;
+    border-left: 0;
+  }
   .main-nav {
     position: absolute;
-    top: calc(var(--header-height) - 1px);
+    top: calc(100% + 8px);
     right: 0;
     left: 0;
     display: none;
     flex-direction: column;
     gap: 2px;
-    padding: 12px 16px 18px;
-    border-bottom: 1px solid var(--line);
+    margin: 0;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
     background: var(--paper);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
   }
   .main-nav.open {
     display: flex;
   }
   .main-nav a {
-    padding: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
     font-size: 16px;
   }
   .mobile-toggle {
@@ -2557,13 +2640,13 @@ details[open] .faq-icon::after {
     width: min(100% - 32px, 1200px);
   }
   .nav-container {
-    gap: 12px;
+    padding-left: 14px;
   }
   .nav-github {
     display: none;
   }
   .hero {
-    padding: 48px 0 64px;
+    padding: calc(var(--header-height) + 40px) 0 64px;
   }
   .hero-content > p {
     font-size: 17px;
@@ -2730,9 +2813,20 @@ details[open] .faq-icon::after {
   }
 }
 /* A container query, unlike a media query, also tracks text zoom on narrow screens. */
-@container site-header (max-width: 379px) {
+@container site-header (max-width: 389px) {
   .nav-start {
     display: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fit-demo {
+    animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
 }
 @media (prefers-reduced-motion: reduce) {

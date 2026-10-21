@@ -19,6 +19,14 @@ import Workflow from './components/Workflow';
 import Toolkit from './components/Toolkit';
 
 const Documentation = lazy(() => import('./components/Documentation'));
+// Decorative and animated, so it loads after first paint in its own chunk, and only on screens
+// wide enough to show it beside the hero text.
+const SignalTraces = lazy(() => import('./components/SignalTraces'));
+const wideScreen = matchMedia('(min-width: 1081px)');
+const subscribeToWidth = (callback: () => void) => {
+  wideScreen.addEventListener('change', callback);
+  return () => wideScreen.removeEventListener('change', callback);
+};
 const subscribeToHash = (callback: () => void) => {
   window.addEventListener('hashchange', callback);
   return () => window.removeEventListener('hashchange', callback);
@@ -104,6 +112,7 @@ const guides = [
 
 function Home() {
   const [startOpen, setStartOpen] = useState(false);
+  const wide = useSyncExternalStore(subscribeToWidth, () => wideScreen.matches);
   const openSetup = () => setStartOpen(true);
   return (
     <>
@@ -139,7 +148,14 @@ function Home() {
                 <li>HTML and JSON reports</li>
               </ul>
             </div>
-            <FitDemo />
+            <div className="demo-board">
+              {wide && (
+                <Suspense fallback={null}>
+                  <SignalTraces />
+                </Suspense>
+              )}
+              <FitDemo />
+            </div>
           </div>
         </section>
 

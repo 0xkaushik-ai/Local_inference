@@ -1,4 +1,4 @@
-import { useId, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 import { Check, TriangleAlert } from 'lucide-react';
 
 const GIB = 1024 ** 3;
@@ -16,6 +16,25 @@ const shortContext = (tokens: number) => `${tokens / 1024}K`;
 const gib = (bytes: number) =>
   `${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(bytes / GIB)} GiB`;
 
+/** Ease a displayed number toward its target; instant when reduced motion is requested. */
+function useTweened(target: number, duration = 360) {
+  const [shown, setShown] = useState(target);
+  const current = useRef(target);
+  useEffect(() => {
+    const origin = current.current;
+    const instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const start = performance.now();
+    let frame = requestAnimationFrame(function step(now) {
+      const progress = instant ? 1 : Math.min(1, (now - start) / duration);
+      current.current = origin + (target - origin) * (1 - (1 - progress) ** 3);
+      setShown(current.current);
+      if (progress < 1) frame = requestAnimationFrame(step);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [target, duration]);
+  return shown;
+}
+
 /** Same estimate as the Model & Context Checker: weights + FP16 KV cache + runtime allowance. */
 function estimate(context: number) {
   const cache = sample.layers * sample.kvHeads * (sample.keyDim + sample.valueDim) * context * 2;
@@ -28,6 +47,7 @@ export default function FitDemo() {
   const id = useId();
   const context = contexts[index];
   const { cache, runtime, total } = estimate(context);
+  const shownTotal = useTweened(total);
   const budget = Math.floor(sample.free * 0.85);
   const fits = total <= budget;
   const scale = Math.max(sample.free, total);
@@ -84,7 +104,7 @@ export default function FitDemo() {
       </div>
       <div className="fit-result" data-fit={fits ? 'fits' : 'exceeds'}>
         <p className="fit-total">
-          <span className="fit-number">{gib(total)}</span>
+          <span className="fit-number">{gib(shownTotal)}</span>
           <span className="fit-caption">estimated memory</span>
         </p>
         <p className="fit-verdict" aria-live="polite">

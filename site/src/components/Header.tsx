@@ -53,7 +53,7 @@ export default function Header({ onStart }: { onStart: () => void }) {
 
   return (
     <header className="site-header" ref={header}>
-      <div className="container nav-container">
+      <div className="nav-container">
         <a className="brand-link" href="#" aria-label="DeviceBench home">
           <Brand />
         </a>

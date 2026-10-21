@@ -37,6 +37,19 @@ borrowed from test equipment, with accurate descriptions of its capabilities.
 - Runtime names link to the relevant setup or research documentation. They do not
   imply customer endorsements or partnerships.
 
+## Motion
+
+- One ambient animation: circuit traces around the hero demo card, with yellow
+  pulses flowing into it. `src/components/SignalTraces.tsx` uses Motion for React
+  and is a lazy chunk that loads after first paint, only at widths of 1081px and
+  above where the card sits beside the text.
+- Pulses animate `transform` and `opacity` only, so they run on the compositor with
+  no layout or script work per frame. They stop when the hero leaves the viewport
+  and never run under `prefers-reduced-motion`; the traces then render statically.
+- Content never waits on motion: headings and copy render immediately. The demo
+  card's entrance and its number tween are short, CSS- or frame-based, and skipped
+  under reduced motion. Add new motion only when it explains a change of state.
+
 ## Interaction conventions
 
 - Tabs support arrow keys, Home, and End. A single tab set works across desktop and
