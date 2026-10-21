@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { CornerDownLeft, FileText, Hash, Search, X } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import { docHref, searchDocs, searchIndex, snippet, type SearchEntry } from '../lib/documentation';
 
 const suggested = ['quickstart', 'readiness-toolkit', 'readiness-release', 'overview']
@@ -11,6 +12,7 @@ export default function DocsSearch({ open, onClose }: { open: boolean; onClose: 
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const id = useId();
+  const navigate = useNavigate();
   const results = query.trim() ? searchDocs(query) : suggested;
   const current = Math.min(active, Math.max(results.length - 1, 0));
 
@@ -21,8 +23,8 @@ export default function DocsSearch({ open, onClose }: { open: boolean; onClose: 
   }, [open]);
 
   function go(entry: SearchEntry) {
-    window.location.hash = docHref(entry.docId, entry.section);
     onClose();
+    navigate(docHref(entry.docId, entry.section));
   }
 
   return (

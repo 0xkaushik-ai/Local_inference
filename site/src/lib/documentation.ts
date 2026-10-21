@@ -1,3 +1,5 @@
+import { docEntries, docHref } from './docs-manifest';
+
 const sources = import.meta.glob<string>(
   [
     '../../../docs/*.md',
@@ -9,26 +11,7 @@ const sources = import.meta.glob<string>(
   { query: '?raw', import: 'default', eager: true },
 );
 
-const entries = [
-  ['overview', 'Start here', 'docs/overview.md', 'Getting started'],
-  ['quickstart', 'Install and run', 'docs/quickstart.md', 'Getting started'],
-  ['readiness-toolkit', 'Readiness tools', 'docs/readiness-toolkit.md', 'Guides'],
-  ['benchmarks', 'Benchmarks and evidence', 'docs/benchmarks.md', 'Guides'],
-  ['runanywhere', 'RunAnywhere adapter', 'docs/runanywhere.md', 'Guides'],
-  ['roadmap', 'Project roadmap', 'docs/roadmap.md', 'Project'],
-  ['readiness-release', 'Release evidence', 'docs/readiness-release.md', 'Project'],
-  ['engine-experiment', 'CPU experiment', 'docs/engine-experiment.md', 'Research'],
-  ['engine-results', 'Engine results', 'docs/engine-results.md', 'Research'],
-  ['engine-kernel-notes', 'Kernel notes', 'docs/engine-kernel-notes.md', 'Research'],
-  ['research', 'Product research', 'docs/research.md', 'Research'],
-  ['development', 'Development', 'docs/development.md', 'Contributing'],
-  ['readme', 'Repository README', 'README.md', 'Contributing'],
-  ['handoff', 'Project handoff', 'Documents.md', 'Contributing'],
-  ['website', 'Website development', 'site/README.md', 'Contributing'],
-  ['design-system', 'Design system', 'site/docs/design-system.md', 'Contributing'],
-];
-
-export const documents = entries.map(([id, title, path, group]) => {
+export const documents = docEntries.map(([id, title, path, group]) => {
   const sourcePath = path.startsWith('site/') ? `../../${path.slice(5)}` : `../../../${path}`;
   const content = sources[sourcePath];
   if (!content) throw new Error(`Missing documentation source: ${path}`);
@@ -37,8 +20,7 @@ export const documents = entries.map(([id, title, path, group]) => {
 
 export type DocumentEntry = (typeof documents)[number];
 
-export const docHref = (id: string, section = '') =>
-  `#/docs/${id}${section ? `?section=${encodeURIComponent(section)}` : ''}`;
+export { docHref };
 
 export const headingId = (text: string) =>
   text

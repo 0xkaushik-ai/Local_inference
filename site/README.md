@@ -12,7 +12,8 @@ for the visual and interaction conventions.
 
 ## Develop
 
-Requires Node.js 22.12+ and npm. The implementation was validated with Node 26.
+Requires Node.js 22.22+ (the minimum for React Router 8) and npm. The implementation was
+validated with Node 25 and 26.
 All direct dependency versions are pinned; `package-lock.json` pins the dependency
 tree. Run these commands from `site/`:
 
@@ -94,11 +95,14 @@ See [app packaging](../docs/development.md#build-and-check-the-desktop-app) and
 ```text
 site/
   src/
-    App.tsx                Page sections, footer, and hash routing
-    components/            Brand, hero demo, tools, workflow, report, setup, docs, search
-    lib/                   Keyboard navigation, documentation registry, and search index
+    App.tsx                Routes and scroll behavior (React Router)
+    pages/                 Home, Tools, How it works, Example report, and not-found pages
+    components/            Layout, header, footer, hero demo, tools, workflow, report,
+                           setup dialog, documentation reader, and search
+    lib/                   Documentation registry and routes, search index, page context,
+                           and keyboard navigation
     styles.css             Tokens, light/dark themes, responsive and reduced-motion styles
-    main.tsx               React entry and bundled fonts
+    main.tsx               React entry, bundled fonts, and redirects for earlier links
   public/assets/           Favicon, touch icon, and social sharing image
   public/downloads/        Generated app archive, checksum, and manifest (ignored)
   tests/                   Playwright browser tests
@@ -129,14 +133,20 @@ metadata; external documentation opens only when a user follows a link.
   They are separate from the three-tool customer journey; the website makes no
   inference speed claim.
 - The production build is static and can be hosted from `dist/`; no deployment is
-  configured or performed by the development scripts.
+  configured or performed by the development scripts. The build copies the page shell
+  to every route (`tools/index.html`, `docs/quickstart/index.html`, …) and to
+  `404.html`, so deep links work on static hosts without rewrite rules.
 
 ## Product structure and documentation
 
-The homepage follows the hero and memory-fit demo → readiness tools →
-diagnose/inspect/test/export workflow → interactive readiness example → results
-and limits → documentation → practical questions. Benchmarks and CPU research are linked as advanced documentation from
-the footer. The setup dialog separates the portable local app candidate from
+Each part of the site has its own address: `/` (hero and memory-fit demo, tools,
+links to the walkthrough and example, principles, guides, and questions), `/tools`
+(tool comparison and scripting), `/how-it-works` (the four-step workflow, what runs
+where, and requirements), `/example-report` (the interactive sample, statuses, and
+exports), and `/docs/<page>#<section>` for documentation. Unknown addresses show a
+not-found page. Links from the earlier hash-based site (`/#/docs/…`, `/#workflow`,
+`/#product`) redirect to these paths. Benchmarks and CPU research are linked as
+advanced documentation from the footer. The setup dialog separates the portable local app candidate from
 advanced source/wheel setup. A generated download is not evidence of a public
 release, platform-wide compatibility, signing, or automatic updates.
 
@@ -148,12 +158,11 @@ service, connection settings, opening the browser, stopping, and quitting. Its
 archive includes Python; a customer's separate runtime and models remain required.
 The website illustrates these tools; only the local companion performs the checks.
 
-Documentation is available at `/#/docs/overview`, with install instructions at
-`/#/docs/quickstart`. `src/lib/documentation.ts` lists the supported documents and
-imports root Markdown files as raw text through Vite. The reader is lazy-loaded
-and renders with `react-markdown` and `remark-gfm`, without raw HTML execution.
-Hash routes work on static hosting without server rewrite rules. Internal Markdown
-links resolve to bundled pages and section anchors. Links to generated `reports/`
+Documentation is available at `/docs/overview`, with install instructions at
+`/docs/quickstart`. `src/lib/docs-manifest.ts` lists the supported documents and
+`src/lib/documentation.ts` imports their Markdown as raw text through Vite. The reader
+is lazy-loaded and renders with `react-markdown` and `remark-gfm`, without raw HTML
+execution. Internal Markdown links resolve to bundled pages and section anchors. Links to generated `reports/`
 evidence are shown as local-file references; private report data is never bundled.
 
 To update a guide, edit its repository Markdown source. To add one, add its entry

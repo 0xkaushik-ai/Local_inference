@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { Link, NavLink } from 'react-router';
 import Brand from './Brand';
 
 const links = [
-  ['Tools', '#tools'],
-  ['How it works', '#workflow'],
-  ['Example report', '#product'],
-  ['Docs', '#/docs/overview'],
+  ['Tools', '/tools'],
+  ['How it works', '/how-it-works'],
+  ['Example report', '/example-report'],
+  ['Docs', '/docs'],
 ];
 
 function GitHubMark() {
@@ -54,18 +55,18 @@ export default function Header({ onStart }: { onStart: () => void }) {
   return (
     <header className="site-header" ref={header}>
       <div className="nav-container">
-        <a className="brand-link" href="#" aria-label="DeviceBench home">
+        <Link className="brand-link" to="/" aria-label="DeviceBench home">
           <Brand />
-        </a>
+        </Link>
         <nav
           className={`main-nav${menuOpen ? ' open' : ''}`}
           aria-label="Main navigation"
           id="main-navigation"
         >
-          {links.map(([label, href]) => (
-            <a key={href} href={href} onClick={() => setMenuOpen(false)}>
+          {links.map(([label, to]) => (
+            <NavLink key={to} to={to} onClick={() => setMenuOpen(false)}>
               {label}
-            </a>
+            </NavLink>
           ))}
         </nav>
         <div className="nav-actions">

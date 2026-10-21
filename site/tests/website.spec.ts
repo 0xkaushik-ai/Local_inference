@@ -8,6 +8,8 @@ test('readiness examples remain labeled and export the selected findings', async
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Know if local AI');
   await expect(page.locator('.hero-kicker')).toContainText('V1 preview');
+  await page.getByRole('navigation').getByRole('link', { name: 'Example report' }).click();
+  await expect(page).toHaveURL(/\/example-report$/);
   await expect(page.locator('.sample-badge')).toContainText('Sample data');
   await page.getByRole('button', { name: 'Test app features', exact: true }).click();
   await expect(page.locator('.readiness-summary')).toContainText('Two checks passed');
@@ -164,7 +166,7 @@ test('the staged application downloads with the exact archive bytes', async ({ p
 });
 
 test('workflow controls change the explanation and file preview', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/how-it-works');
   await page.getByRole('tab', { name: '04 Export the evidence' }).click();
   await expect(page.locator('#workflow-panel')).toContainText('report.html');
   await expect(page.locator('#workflow-panel')).toContainText('report.json');
@@ -191,7 +193,10 @@ test('desktop page renders without horizontal overflow', async ({ page }, testIn
 
 test('Tools navigation reaches the local toolkit and opens setup', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('navigation').getByRole('link', { name: 'Tools', exact: true }).click();
+  const toolsLink = page.getByRole('navigation').getByRole('link', { name: 'Tools', exact: true });
+  await toolsLink.click();
+  await expect(page).toHaveURL(/\/tools$/);
+  await expect(toolsLink).toHaveAttribute('aria-current', 'page');
   await expect(
     page.locator('#tools').getByRole('heading', { name: 'Local AI Doctor' }),
   ).toBeVisible();
@@ -205,10 +210,12 @@ test('mobile navigation, report views, and setup remain usable', async ({ page }
   await page.goto('/');
   await page.getByRole('button', { name: 'Open navigation' }).click();
   await page.getByRole('navigation').getByRole('link', { name: 'How it works' }).click();
+  await expect(page).toHaveURL(/\/how-it-works$/);
   await expect(page.getByRole('button', { name: 'Open navigation' })).toHaveAttribute(
     'aria-expanded',
     'false',
   );
+  await page.goto('/example-report');
   await page.getByLabel('Example tool').selectOption('2');
   await expect(page.locator('.readiness-summary')).toContainText('Two checks passed');
   await page.getByRole('tab', { name: 'Raw evidence', exact: true }).click();

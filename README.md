@@ -20,7 +20,7 @@ See the [V1 launch checklist](docs/roadmap.md#v1-launch-checklist).
 
 Start with the [documentation overview](docs/overview.md) or
 [installation and first run](docs/quickstart.md). The website also renders these
-same guides at `http://127.0.0.1:8765/#/docs/overview` when running locally.
+same guides at `http://127.0.0.1:8765/docs/overview` when running locally.
 
 - [Readiness tools](docs/readiness-toolkit.md): Doctor, model/context checks, and app compatibility.
 - [Benchmarks and evidence](docs/benchmarks.md): suites, metrics, exports, and captured results.

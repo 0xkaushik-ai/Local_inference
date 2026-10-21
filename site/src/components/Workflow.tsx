@@ -1,12 +1,7 @@
 import { useState } from 'react';
-import {
-  ArrowUpRight,
-  Check,
-  ChevronRight,
-  FileJson,
-  FolderOpen,
-  PanelsTopLeft,
-} from 'lucide-react';
+import { ArrowRight, Check, ChevronRight, FileJson, FolderOpen, PanelsTopLeft } from 'lucide-react';
+import { Link } from 'react-router';
+import { docHref } from '../lib/docs-manifest';
 import { navigateTabs } from '../lib/tabs';
 
 const steps = [
@@ -32,7 +27,7 @@ const steps = [
     description:
       'In the dashboard, select Model & Context Checker, choose an installed model, and set your context size. Review declared limits and memory estimates; missing data stays visible.',
     link: 'Read the model guide',
-    guide: '#/docs/readiness-toolkit?section=model-and-context-checker',
+    guide: docHref('readiness-toolkit', 'model-and-context-checker'),
     panel: 'Model & Context Checker',
     fields: [
       ['Choose', 'An installed model'],
@@ -50,7 +45,7 @@ const steps = [
     description:
       'Choose App Compatibility Tester, select the features your app needs, and run the check. Read the findings for streaming, structured JSON, tool calling, or embeddings.',
     link: 'Read the compatibility guide',
-    guide: '#/docs/readiness-toolkit?section=app-compatibility-tester',
+    guide: docHref('readiness-toolkit', 'app-compatibility-tester'),
     panel: 'App Compatibility Tester',
     fields: [
       ['Choose', 'Your model and app preset'],
@@ -68,7 +63,7 @@ const steps = [
     description:
       'Download your findings as HTML or JSON from the dashboard. Read the observed responses and review device details before sharing with your team. Save reports before stopping the companion.',
     link: 'Read the export guide',
-    guide: '#/docs/readiness-toolkit?section=statuses-reports-and-limits',
+    guide: docHref('readiness-toolkit', 'statuses-reports-and-limits'),
     panel: 'Your report files',
     fields: [
       ['report.html', 'Readable, standalone findings'],
@@ -89,10 +84,10 @@ export default function Workflow({ onStart }: { onStart: () => void }) {
     <section className="section workflow-section" id="workflow" aria-labelledby="workflow-title">
       <div className="container">
         <div className="section-head split">
-          <h2 id="workflow-title">From setup to evidence in four steps.</h2>
+          <h2 id="workflow-title">Walk through the four steps.</h2>
           <p>
-            The launcher opens the dashboard in your browser. Work through the tools in order, or
-            jump straight to the one you need.
+            Pick a step to see what you do in the dashboard and what you get back. Work through the
+            tools in order, or jump straight to the one you need.
           </p>
         </div>
         <div className="workflow-layout">
@@ -124,12 +119,12 @@ export default function Workflow({ onStart }: { onStart: () => void }) {
             <div className="workflow-description">
               <p>{selected.description}</p>
               {selected.guide ? (
-                <a className="text-link" href={selected.guide}>
-                  {selected.link} <ArrowUpRight size={15} />
-                </a>
+                <Link className="text-link" to={selected.guide}>
+                  {selected.link} <ArrowRight size={15} aria-hidden="true" />
+                </Link>
               ) : (
                 <button className="text-button" onClick={onStart}>
-                  {selected.link} <ArrowUpRight size={15} />
+                  {selected.link} <ArrowRight size={15} aria-hidden="true" />
                 </button>
               )}
             </div>

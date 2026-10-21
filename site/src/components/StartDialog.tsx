@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, Copy, Download, ExternalLink, Terminal, X } from 'lucide-react';
+import { ArrowRight, Check, Copy, Download, ExternalLink, Terminal, X } from 'lucide-react';
+import { Link } from 'react-router';
 import Brand from './Brand';
+import { docHref } from '../lib/docs-manifest';
 import { navigateTabs } from '../lib/tabs';
 
 const platforms = ['Linux', 'macOS', 'Windows'] as const;
@@ -256,9 +258,9 @@ export default function StartDialog({ open, onClose }: { open: boolean; onClose:
           </p>
         </details>
       </div>
-      <a className="text-link" href="#/docs/quickstart" onClick={onClose}>
-        Full setup and troubleshooting <ExternalLink size={14} />
-      </a>
+      <Link className="text-link" to={docHref('quickstart')} onClick={onClose}>
+        Full setup and troubleshooting <ArrowRight size={14} aria-hidden="true" />
+      </Link>
     </dialog>
   );
 }

@@ -2,6 +2,7 @@ import { memo, useEffect, useRef, useState, type ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Copy, Menu, Search, X } from 'lucide-react';
+import { Link, useLocation, useParams } from 'react-router';
 import Brand from './Brand';
 import DocsSearch from './DocsSearch';
 import {
@@ -90,6 +91,7 @@ const DocArticle = memo(function DocArticle({ doc }: { doc: DocumentEntry }) {
                   {children} (local evidence file)
                 </span>
               );
+            if (destination.startsWith('/')) return <Link to={destination}>{children}</Link>;
             const external = /^https?:\/\//.test(destination);
             return (
               <a
@@ -122,10 +124,11 @@ const DocArticle = memo(function DocArticle({ doc }: { doc: DocumentEntry }) {
   );
 });
 
-export default function Documentation({ route }: { route: string }) {
-  const [id, query = ''] = route.slice('#/docs/'.length).split('?');
-  const selected = documents.find((entry) => entry.id === (id || 'overview'));
-  const section = new URLSearchParams(query).get('section');
+export default function Documentation() {
+  const { id = 'overview' } = useParams();
+  const { hash } = useLocation();
+  const selected = documents.find((entry) => entry.id === id);
+  const section = hash ? decodeURIComponent(hash.slice(1)) : null;
   const content = useRef<HTMLElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -177,14 +180,14 @@ export default function Documentation({ route }: { route: string }) {
   return (
     <>
       <title>{`${selected?.title ?? 'Page not found'} — DeviceBench docs`}</title>
-      <a className="skip-link" href={docHref(id || 'overview', 'doc-content')}>
+      <a className="skip-link" href="#doc-content">
         Skip to documentation
       </a>
       <header className="docs-header">
         <div className="docs-header-inner">
-          <a className="brand-link" href="#main" aria-label="DeviceBench home">
+          <Link className="brand-link" to="/" aria-label="DeviceBench home">
             <Brand />
-          </a>
+          </Link>
           <span className="docs-label">Docs</span>
           <button
             type="button"
@@ -197,9 +200,9 @@ export default function Documentation({ route }: { route: string }) {
             <kbd aria-hidden="true">{shortcut}</kbd>
           </button>
           <div className="docs-header-actions">
-            <a className="back-link" href="#main">
+            <Link className="back-link" to="/">
               <ArrowLeft size={15} aria-hidden="true" /> Back to product
-            </a>
+            </Link>
             <a className="nav-github" href={repository} target="_blank" rel="noreferrer">
               GitHub <ArrowUpRight size={14} aria-hidden="true" />
             </a>
@@ -228,21 +231,21 @@ export default function Documentation({ route }: { route: string }) {
               {documents
                 .filter((entry) => entry.group === group)
                 .map((entry) => (
-                  <a
+                  <Link
                     key={entry.id}
-                    href={docHref(entry.id)}
+                    to={docHref(entry.id)}
                     aria-current={entry.id === selected?.id ? 'page' : undefined}
                     onClick={closeMenu}
                   >
                     {entry.title}
-                  </a>
+                  </Link>
                 ))}
             </div>
           ))}
         </nav>
         <main className="docs-content" id="doc-content" ref={content} tabIndex={-1}>
           <p className="docs-breadcrumb">
-            <a href={docHref('overview')}>Docs</a>
+            <Link to="/docs">Docs</Link>
             <span aria-hidden="true">/</span>
             {selected?.group ?? 'Not found'}
           </p>
@@ -253,29 +256,29 @@ export default function Documentation({ route }: { route: string }) {
               <h1>Page not found</h1>
               <p>
                 This documentation page does not exist.{' '}
-                <a href={docHref('overview')}>Return to the documentation overview.</a>
+                <Link to={docHref('overview')}>Return to the documentation overview.</Link>
               </p>
             </article>
           )}
           {selected && (previous || next) && (
             <nav className="docs-pager" aria-label="Previous and next pages">
               {previous ? (
-                <a className="pager-link" href={docHref(previous.id)}>
+                <Link className="pager-link" to={docHref(previous.id)}>
                   <span>
                     <ArrowLeft size={14} aria-hidden="true" /> Previous
                   </span>
                   <strong>{previous.title}</strong>
-                </a>
+                </Link>
               ) : (
                 <span />
               )}
               {next && (
-                <a className="pager-link next" href={docHref(next.id)}>
+                <Link className="pager-link next" to={docHref(next.id)}>
                   <span>
                     Next <ArrowRight size={14} aria-hidden="true" />
                   </span>
                   <strong>{next.title}</strong>
-                </a>
+                </Link>
               )}
             </nav>
           )}
@@ -297,13 +300,13 @@ export default function Documentation({ route }: { route: string }) {
           {headings.map((line) => {
             const target = headingId(line.slice(3));
             return (
-              <a
+              <Link
                 key={line}
-                href={docHref(selected!.id, target)}
+                to={docHref(selected!.id, target)}
                 aria-current={activeHeading === target ? 'true' : undefined}
               >
                 {line.slice(3)}
-              </a>
+              </Link>
             );
           })}
         </aside>

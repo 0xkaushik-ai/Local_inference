@@ -1,4 +1,6 @@
 import { ArrowRight, Cable, Check, Cpu, Stethoscope } from 'lucide-react';
+import { Link } from 'react-router';
+import { docHref } from '../lib/docs-manifest';
 
 const tools = [
   {
@@ -39,57 +41,72 @@ const tools = [
   },
 ];
 
+export function ToolGrid() {
+  return (
+    <ol className="tool-grid">
+      {tools.map(({ Icon, title, text, guide, question, points }, index) => (
+        <li key={title}>
+          <article className="tool-card">
+            <div className="tool-top">
+              <span className="tool-icon">
+                <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              <span className="tool-step">Step {index + 1}</span>
+            </div>
+            <h3>{title}</h3>
+            <p className="tool-question">{question}</p>
+            <p>{text}</p>
+            <ul className="tool-points">
+              {points.map((point) => (
+                <li key={point}>
+                  <Check size={15} aria-hidden="true" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+            <Link className="text-link tool-guide" to={docHref('readiness-toolkit', guide)}>
+              Read the guide <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </article>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function ToolkitFoot({ onStart }: { onStart: () => void }) {
+  return (
+    <div className="toolkit-foot">
+      <p>
+        Use the Linux application preview with your existing AI server and models. Python is
+        bundled. Windows and macOS applications are pending; developer setup is also available.
+      </p>
+      <button className="button dark" onClick={onStart}>
+        Set up the local toolkit
+      </button>
+    </div>
+  );
+}
+
+/** The home page's overview of the three tools. */
 export default function Toolkit({ onStart }: { onStart: () => void }) {
   return (
     <section className="section toolkit-section" id="tools" aria-labelledby="tools-title">
       <div className="container">
         <div className="section-head split">
           <h2 id="tools-title">Three checks, one local workspace.</h2>
-          <p>
-            Start with your setup, then size a model, then test what your app needs. Each tool also
-            works on its own, in the dashboard or from the command line.
-          </p>
+          <div>
+            <p>
+              Start with your setup, then size a model, then test what your app needs. Each tool
+              also works on its own, in the dashboard or from the command line.
+            </p>
+            <Link className="text-link section-link" to="/tools">
+              Compare the tools <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
         </div>
-        <ol className="tool-grid">
-          {tools.map(({ Icon, title, text, guide, question, points }, index) => (
-            <li key={title}>
-              <article className="tool-card">
-                <div className="tool-top">
-                  <span className="tool-icon">
-                    <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
-                  </span>
-                  <span className="tool-step">Step {index + 1}</span>
-                </div>
-                <h3>{title}</h3>
-                <p className="tool-question">{question}</p>
-                <p>{text}</p>
-                <ul className="tool-points">
-                  {points.map((point) => (
-                    <li key={point}>
-                      <Check size={15} aria-hidden="true" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  className="text-link tool-guide"
-                  href={`#/docs/readiness-toolkit?section=${guide}`}
-                >
-                  Read the guide <ArrowRight size={15} aria-hidden="true" />
-                </a>
-              </article>
-            </li>
-          ))}
-        </ol>
-        <div className="toolkit-foot">
-          <p>
-            Use the Linux application preview with your existing AI server and models. Python is
-            bundled. Windows and macOS applications are pending; developer setup is also available.
-          </p>
-          <button className="button dark" onClick={onStart}>
-            Set up the local toolkit
-          </button>
-        </div>
+        <ToolGrid />
+        <ToolkitFoot onStart={onStart} />
       </div>
     </section>
   );

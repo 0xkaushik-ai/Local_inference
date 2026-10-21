@@ -13,7 +13,9 @@ import {
   Stethoscope,
   TriangleAlert,
 } from 'lucide-react';
+import { Link } from 'react-router';
 import { LogoMark } from './Brand';
+import { docHref } from '../lib/docs-manifest';
 import { navigateTabs } from '../lib/tabs';
 
 const statusLabels: Record<string, string> = {
@@ -145,17 +147,7 @@ export default function ReportPreview({ onStart }: { onStart: () => void }) {
     URL.revokeObjectURL(url);
   }
   return (
-    <div className="report-stage" id="product">
-      <div className="product-intro">
-        <div className="section-head">
-          <h2>See a report before you run one.</h2>
-          <p>
-            Every check ends with a plain verdict, the findings behind it, and a next step. Pick a
-            tool to explore a sample report.
-          </p>
-        </div>
-        <span className="sample-badge">Sample data</span>
-      </div>
+    <div className="report-stage">
       <div className="report-window readiness-preview">
         <div className="window-bar">
           <span className="window-dots" aria-hidden="true">
@@ -304,12 +296,9 @@ export default function ReportPreview({ onStart }: { onStart: () => void }) {
                   <ListChecks size={26} strokeWidth={1.6} aria-hidden="true" />
                   <h4>What to do with this finding</h4>
                   <p>{selected.next}</p>
-                  <a
-                    className="text-link"
-                    href={`#/docs/readiness-toolkit?section=${selected.guide}`}
-                  >
+                  <Link className="text-link" to={docHref('readiness-toolkit', selected.guide)}>
                     Read the tool guide <ArrowRight size={15} aria-hidden="true" />
-                  </a>
+                  </Link>
                   <button className="button dark" onClick={onStart}>
                     Check your own setup
                   </button>
