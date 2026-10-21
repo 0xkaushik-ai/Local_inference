@@ -30,7 +30,7 @@ test('tool guides resolve locally, navigate sections, and retain browser history
   await page.goBack();
   await expect(page.locator('#doc-content')).toBeFocused();
   await page.getByRole('link', { name: 'Back to product' }).click();
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Ready for');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Know if local AI');
   expect(errors).toEqual([]);
 });
 

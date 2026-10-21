@@ -100,10 +100,10 @@ export default function StartDialog({ open, onClose }: { open: boolean; onClose:
       <div className="dialog-head">
         <Brand />
         <button className="icon-button" onClick={onClose} aria-label="Close setup">
-          <X size={20} />
+          <X size={20} aria-hidden="true" />
         </button>
       </div>
-      <span className="eyebrow">V1 PREVIEW / LOCAL APPLICATION</span>
+      <p className="dialog-kicker">Local application, V1 preview</p>
       <h2 id="start-title">Download. Open. Check.</h2>
       <p>
         The application bundles Python and the local dashboard. Keep your AI server and models
@@ -155,8 +155,8 @@ export default function StartDialog({ open, onClose }: { open: boolean; onClose:
               <p>
                 Portable application. No Python installation, source checkout, or build required.
               </p>
-              <a className="button dark" href={`/downloads/${download.filename}`} download>
-                <Download size={16} /> Download Linux preview
+              <a className="button primary" href={`/downloads/${download.filename}`} download>
+                <Download size={16} aria-hidden="true" /> Download Linux preview
               </a>
               <p className="download-requirements">
                 Requires a Linux desktop, x86_64, and glibc {download.glibc} or newer. Verified on

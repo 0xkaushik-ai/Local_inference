@@ -86,95 +86,103 @@ export default function Workflow({ onStart }: { onStart: () => void }) {
   const [active, setActive] = useState(0);
   const selected = steps[active];
   return (
-    <section className="workflow-section container" id="workflow">
-      <div className="section-topline">
-        <span className="section-label">02 / The workflow</span>
-      </div>
-      <h2>
-        From setup
-        <br />
-        to evidence.
-      </h2>
-      <div className="workflow-layout">
-        <div>
-          <div
-            className="workflow-tabs"
-            role="tablist"
-            onKeyDown={navigateTabs}
-            aria-label="Local AI workflow"
-            aria-orientation="vertical"
-          >
-            {steps.map((step, i) => (
-              <div key={step.title} className={`workflow-step ${active === i ? 'active' : ''}`}>
-                <button
-                  role="tab"
-                  tabIndex={active === i ? 0 : -1}
-                  aria-selected={active === i}
-                  aria-controls="workflow-panel"
-                  id={`workflow-${i}`}
-                  onClick={() => setActive(i)}
-                >
-                  <span>0{i + 1}</span>
-                  <strong>{step.title}</strong>
-                  <ChevronRight size={17} />
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="workflow-description">
-            <p>{selected.description}</p>
-            {selected.guide ? (
-              <a className="text-link" href={selected.guide}>
-                {selected.link} <ArrowUpRight size={15} />
-              </a>
-            ) : (
-              <button className="text-button" onClick={onStart}>
-                {selected.link} <ArrowUpRight size={15} />
-              </button>
-            )}
-          </div>
+    <section className="section workflow-section" id="workflow" aria-labelledby="workflow-title">
+      <div className="container">
+        <div className="section-head split">
+          <h2 id="workflow-title">From setup to evidence in four steps.</h2>
+          <p>
+            The launcher opens the dashboard in your browser. Work through the tools in order, or
+            jump straight to the one you need.
+          </p>
         </div>
-        <div
-          className="workflow-panel"
-          id="workflow-panel"
-          role="tabpanel"
-          aria-labelledby={`workflow-${active}`}
-        >
-          <div className="workflow-window-top">
-            <span className="window-dots">
-              <i />
-              <i />
-              <i />
-            </span>
-            <span>devicebench / dashboard walkthrough</span>
-          </div>
-          <div className="workflow-terminal">
-            <div className="terminal-label">
-              {active === 3 ? <FolderOpen size={19} /> : <PanelsTopLeft size={19} />}
-              <span>{selected.panel}</span>
-            </div>
-            <dl className="workflow-fields">
-              {selected.fields.map(([label, value]) => (
-                <div key={label}>
-                  <dt>{label}</dt>
-                  <dd>{value}</dd>
+        <div className="workflow-layout">
+          <div>
+            <div
+              className="workflow-tabs"
+              role="tablist"
+              onKeyDown={navigateTabs}
+              aria-label="Local AI workflow"
+              aria-orientation="vertical"
+            >
+              {steps.map((step, i) => (
+                <div key={step.title} className={`workflow-step ${active === i ? 'active' : ''}`}>
+                  <button
+                    role="tab"
+                    tabIndex={active === i ? 0 : -1}
+                    aria-selected={active === i}
+                    aria-controls="workflow-panel"
+                    id={`workflow-${i}`}
+                    onClick={() => setActive(i)}
+                  >
+                    <span className="workflow-number">0{i + 1}</span>
+                    <strong>{step.title}</strong>
+                    <ChevronRight size={17} aria-hidden="true" />
+                  </button>
                 </div>
               ))}
-            </dl>
-            {selected.lines.map((line) => (
-              <div className="terminal-check" key={line}>
-                <Check size={14} />
-                {line}
-              </div>
-            ))}
+            </div>
+            <div className="workflow-description">
+              <p>{selected.description}</p>
+              {selected.guide ? (
+                <a className="text-link" href={selected.guide}>
+                  {selected.link} <ArrowUpRight size={15} />
+                </a>
+              ) : (
+                <button className="text-button" onClick={onStart}>
+                  {selected.link} <ArrowUpRight size={15} />
+                </button>
+              )}
+            </div>
           </div>
-          <div className="workflow-file">
-            <FileJson size={18} />
-            <span>
-              Your checks stay on your computer
-              <small>Save HTML and JSON reports before quitting.</small>
-            </span>
-            <Check size={15} />
+          <div
+            className="workflow-panel"
+            id="workflow-panel"
+            role="tabpanel"
+            aria-labelledby={`workflow-${active}`}
+          >
+            <div className="window-bar">
+              <span className="window-dots" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="window-title">DeviceBench dashboard</span>
+              <span className="window-address" translate="no">
+                127.0.0.1:8766
+              </span>
+            </div>
+            <div className="workflow-terminal">
+              <div className="terminal-label">
+                {active === 3 ? (
+                  <FolderOpen size={19} aria-hidden="true" />
+                ) : (
+                  <PanelsTopLeft size={19} aria-hidden="true" />
+                )}
+                <span>{selected.panel}</span>
+                <span className="terminal-step">Step {active + 1} of 4</span>
+              </div>
+              <dl className="workflow-fields">
+                {selected.fields.map(([label, value]) => (
+                  <div key={label}>
+                    <dt>{label}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              {selected.lines.map((line) => (
+                <div className="terminal-check" key={line}>
+                  <Check size={14} aria-hidden="true" />
+                  {line}
+                </div>
+              ))}
+            </div>
+            <div className="workflow-file">
+              <FileJson size={18} aria-hidden="true" />
+              <span>
+                Your checks stay on your computer
+                <small>Save HTML and JSON reports before quitting.</small>
+              </span>
+            </div>
           </div>
         </div>
       </div>

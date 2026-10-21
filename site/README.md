@@ -3,12 +3,12 @@
 A React + TypeScript product website and documentation hub for DeviceBench V1,
 the three-tool local AI readiness toolkit. The public-facing status is V1 preview;
 `0.2.0` is the internal Python development package version.
-Vite handles development and production builds. The design references the visual
-structure of [Devin's public website](https://devin.ai/), refined toward an enterprise
-developer product: IBM Plex typography, a warm neutral canvas, restrained rust accents,
-and an unobstructed report workspace. Branding, artwork, and copy are specific to
-DeviceBench. See [design system](docs/design-system.md) for the visual and interaction
-conventions.
+Vite handles development and production builds. The identity borrows from test
+equipment: a chip-and-bars mark, white and graphite surfaces, an instrument-yellow
+signal, and condensed IBM Plex headlines. The hero's interactive memory-fit demo uses
+the Model & Context Checker's own formula with labeled sample inputs. Branding,
+artwork, and copy are specific to DeviceBench. See [design system](docs/design-system.md)
+for the visual and interaction conventions.
 
 ## Develop
 
@@ -94,12 +94,12 @@ See [app packaging](../docs/development.md#build-and-check-the-desktop-app) and
 ```text
 site/
   src/
-    App.tsx                Page sections and navigation
-    components/            Tools, workflow, report, setup, documentation, brand
-    lib/                   Keyboard navigation and documentation registry
-    styles.css             Responsive styles and reduced-motion support
-    main.tsx               React entry and bundled font
-  public/assets/           Static favicon
+    App.tsx                Page sections, footer, and hash routing
+    components/            Brand, hero demo, tools, workflow, report, setup, docs, search
+    lib/                   Keyboard navigation, documentation registry, and search index
+    styles.css             Tokens, light/dark themes, responsive and reduced-motion styles
+    main.tsx               React entry and bundled fonts
+  public/assets/           Favicon, touch icon, and social sharing image
   public/downloads/        Generated app archive, checksum, and manifest (ignored)
   tests/                   Playwright browser tests
   index.html               Vite HTML entry
@@ -107,8 +107,8 @@ site/
   package-lock.json        Exact dependency tree
 ```
 
-IBM Plex Sans and IBM Plex Mono are bundled locally through Fontsource. Icons use
-Lucide, and the measurement-inspired brand mark is an original SVG. The page makes
+IBM Plex Sans (with its width axis) and IBM Plex Mono are bundled locally through
+Fontsource. Icons use Lucide, and the chip-and-bars brand mark is an original SVG. The page makes
 no requests to inference APIs. The setup dialog reads same-origin static download
 metadata; external documentation opens only when a user follows a link.
 
@@ -133,15 +133,15 @@ metadata; external documentation opens only when a user follows a link.
 
 ## Product structure and documentation
 
-The homepage follows readiness tools → diagnose/inspect/test/export workflow →
-interactive readiness example → results and limits → documentation → practical
-questions. Benchmarks and CPU research are linked as advanced documentation from
+The homepage follows the hero and memory-fit demo → readiness tools →
+diagnose/inspect/test/export workflow → interactive readiness example → results
+and limits → documentation → practical questions. Benchmarks and CPU research are linked as advanced documentation from
 the footer. The setup dialog separates the portable local app candidate from
 advanced source/wheel setup. A generated download is not evidence of a public
 release, platform-wide compatibility, signing, or automatic updates.
 
 The local toolkit is launched separately. Its dashboard is plain HTML/CSS/JavaScript
-bundled in Python, with the same brand colors and measurement mark. It includes
+bundled in Python, with the same brand mark and color tokens. It includes
 Help & setup, editable app presets, next-step guidance, and reports matched to the
 active tool's selected settings. The desktop launcher handles starting the local
 service, connection settings, opening the browser, stopping, and quitting. Its

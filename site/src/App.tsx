@@ -1,6 +1,17 @@
 import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from 'react';
-import { ArrowDown, ArrowUpRight, ArrowRight } from 'lucide-react';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  FileJson,
+  Gauge,
+  LifeBuoy,
+  ListChecks,
+  MonitorCheck,
+  ScanEye,
+} from 'lucide-react';
 import Brand from './components/Brand';
+import FitDemo from './components/FitDemo';
 import Header from './components/Header';
 import ReportPreview from './components/ReportPreview';
 import StartDialog from './components/StartDialog';
@@ -17,7 +28,7 @@ export default function App() {
   const route = useSyncExternalStore(subscribeToHash, () => window.location.hash);
   useEffect(() => {
     if (!route.startsWith('#/docs/')) {
-      document.title = 'DeviceBench — Local AI readiness';
+      document.title = 'DeviceBench — Know if local AI will run on your machine';
       if (route) document.getElementById(route.slice(1))?.scrollIntoView();
     }
   }, [route]);
@@ -64,6 +75,32 @@ const questions = [
       'This is the V1 preview, version 0.2.0. Open Get started for available downloads and system requirements. The Linux x64 application has been verified on the build workstation. Windows/macOS applications, wider Linux validation, a distribution license, signing, and public publishing are pending.',
   },
 ];
+const guides = [
+  {
+    Icon: MonitorCheck,
+    title: 'Install and run',
+    description: 'Open the app, connect your runtime, and collect your first report.',
+    href: '#/docs/quickstart',
+  },
+  {
+    Icon: ListChecks,
+    title: 'Use the tools',
+    description: 'Commands, supported features, estimates, and result statuses.',
+    href: '#/docs/readiness-toolkit',
+  },
+  {
+    Icon: ScanEye,
+    title: 'Understand your results',
+    description: 'What passed, unsupported, unavailable, and memory estimates mean.',
+    href: '#/docs/readiness-toolkit?section=statuses-reports-and-limits',
+  },
+  {
+    Icon: LifeBuoy,
+    title: 'Check current support',
+    description: 'Verified platforms, runtime support, and preview limitations.',
+    href: '#/docs/overview',
+  },
+];
 
 function Home() {
   const [startOpen, setStartOpen] = useState(false);
@@ -75,225 +112,245 @@ function Home() {
       </a>
       <Header onStart={openSetup} />
       <main id="main">
-        <section className="hero container">
-          <div className="hero-kicker">
-            <span className="brand-tick" /> Local AI readiness / V1 preview{' '}
-            <span className="hero-edition">Your machine. Clear next steps.</span>
-          </div>
-          <div className="hero-copy">
-            <h1>
-              Local AI.
-              <br />
-              Ready for <span>you?</span>
-            </h1>
+        <section className="hero" aria-labelledby="hero-title">
+          <div className="container hero-grid">
             <div className="hero-content">
+              <div className="hero-kicker">
+                <span className="kicker-tag">V1 preview</span>
+                <span>Tested on Linux. Windows and macOS validation is pending.</span>
+              </div>
+              <h1 id="hero-title">Know if local AI will run on your machine.</h1>
               <p>
-                Find setup problems, understand model requirements, and test the features your app
-                needs. Three practical tools, in one local workspace.
+                DeviceBench checks your runtime, estimates the memory a model needs at your context
+                length, and tests the API features your app depends on. Everything runs on your
+                computer.
               </p>
               <div className="hero-actions">
-                <button className="button dark" onClick={openSetup}>
-                  Get started <ArrowUpRight size={17} />
+                <button className="button primary" onClick={openSetup}>
+                  Get started
                 </button>
-                <a className="hero-secondary" href="#tools">
-                  Explore the tools <ArrowDown size={16} />
+                <a className="button secondary" href="#/docs/quickstart">
+                  Read the quickstart
                 </a>
               </div>
-              <span className="hero-footnote">
-                Runs locally · No account required · Linux verified
-              </span>
+              <ul className="hero-facts" aria-label="Highlights">
+                <li>No account</li>
+                <li>No telemetry</li>
+                <li>HTML and JSON reports</li>
+              </ul>
             </div>
+            <FitDemo />
           </div>
-          <div className="runtime-line" aria-label="Runtime support by workflow">
-            <span>Readiness tools</span>
+        </section>
+
+        <section className="runtime-band" aria-label="Supported runtimes">
+          <div className="container runtime-line">
+            <span className="runtime-label">Works with</span>
             <a href="#/docs/readiness-toolkit">
-              Ollama <ArrowUpRight size={13} />
+              Ollama native API <ArrowUpRight size={14} aria-hidden="true" />
             </a>
             <a href="#/docs/overview?section=runtime-support">
-              Local OpenAI-compatible APIs <ArrowUpRight size={13} />
+              Local OpenAI-compatible servers <ArrowUpRight size={14} aria-hidden="true" />
             </a>
-            <span className="runtime-end">CLI + local dashboard</span>
+            <span className="runtime-end">Desktop launcher, local dashboard, and CLI</span>
           </div>
         </section>
 
         <Toolkit onStart={openSetup} />
         <Workflow onStart={openSetup} />
 
-        <section className="product-section container" aria-label="Interactive example report">
-          <ReportPreview onStart={openSetup} />
-          <p className="product-caption">
-            <span>Fig. 01</span> Illustrative reports. Launch the local dashboard to check your own
-            setup.
-          </p>
-        </section>
-
-        <section className="principles container" id="capabilities">
-          <div className="section-heading">
-            <span className="section-label">03 / Make the next decision</span>
-            <h2>
-              Useful answers.
-              <br />
-              Visible limitations.
-            </h2>
-            <p>
-              Understand what worked, what needs attention, and what the tool could not determine.
+        <section className="section product-section" aria-label="Interactive example report">
+          <div className="container">
+            <ReportPreview onStart={openSetup} />
+            <p className="product-caption">
+              Illustrative reports. Launch the local dashboard to check your own setup.
             </p>
-          </div>
-          <div className="measure-list">
-            <article>
-              <span className="measure-number">01</span>
-              <h3>See the finding</h3>
-              <p>
-                Connection problems, unsupported features, and missing data have distinct results. A
-                completed check does not automatically mean everything passed.
-              </p>
-              <span className="measure-unit">Clear result statuses</span>
-            </article>
-            <article>
-              <span className="measure-number">02</span>
-              <h3>Understand the limits</h3>
-              <p>
-                Memory estimates include assumptions. Compatibility checks include the observed
-                responses. Missing hardware or model data stays visible.
-              </p>
-              <span className="measure-unit">Evidence with context</span>
-            </article>
-            <article>
-              <span className="measure-number">03</span>
-              <h3>Keep a useful record</h3>
-              <p>
-                Download a readable HTML report or structured JSON. Share the details your teammate
-                needs to investigate the same setup.
-              </p>
-              <span className="measure-unit">Export when you choose</span>
-            </article>
           </div>
         </section>
 
-        <section className="documentation-section container" id="documentation">
-          <div className="section-heading">
-            <span className="section-label">04 / Documentation</span>
-            <h2>
-              From first check
-              <br />
-              to useful evidence.
-            </h2>
-            <p>
-              Installation, tool references, and a clear record of what is validated and what comes
-              next.
-            </p>
+        <section className="principles-band" id="capabilities" aria-labelledby="principles-title">
+          <div className="container">
+            <div className="section-head">
+              <h2 id="principles-title">Honest about what it knows.</h2>
+              <p>
+                A check that cannot decide says so. Every result carries its evidence and its
+                limits, so the next decision is yours to make.
+              </p>
+            </div>
+            <div className="principle-grid">
+              <article>
+                <Gauge size={22} aria-hidden="true" />
+                <h3>Runs on your computer</h3>
+                <p>
+                  The dashboard runs on 127.0.0.1 and talks only to the local runtime you choose. No
+                  account, no telemetry, nothing uploaded.
+                </p>
+              </article>
+              <article>
+                <ScanEye size={22} aria-hidden="true" />
+                <h3>Limits stay visible</h3>
+                <p>
+                  Estimates name their assumptions. Failed, unsupported, and unavailable are
+                  different results, and missing hardware data stays unknown.
+                </p>
+              </article>
+              <article>
+                <FileJson size={22} aria-hidden="true" />
+                <h3>Evidence you can keep</h3>
+                <p>
+                  Download readable HTML or structured JSON with the requests and responses behind
+                  each finding. Review device details before sharing.
+                </p>
+              </article>
+            </div>
           </div>
-          <div className="guide-list">
-            {[
-              [
-                '01',
-                'Install and run',
-                'Launch the local companion and collect your first report.',
-                'quickstart',
-              ],
-              [
-                '02',
-                'Use the tools',
-                'Commands, supported features, estimates, and result statuses.',
-                'readiness-toolkit',
-              ],
-              [
-                '03',
-                'Understand your results',
-                'What pass, unsupported, unavailable, and memory estimates mean.',
-                'readiness-toolkit?section=statuses-reports-and-limits',
-              ],
-              [
-                '04',
-                'Check current support',
-                'Verified platforms, runtime support, and preview limitations.',
-                'overview',
-              ],
-            ].map(([number, title, description, id]) => (
-              <a key={id} href={`#/docs/${id}`}>
-                <span className="measure-number">{number}</span>
-                <div>
+        </section>
+
+        <section
+          className="section guides-section"
+          id="documentation"
+          aria-labelledby="guides-title"
+        >
+          <div className="container">
+            <div className="section-head split">
+              <h2 id="guides-title">Start with a guide.</h2>
+              <p>
+                Installation, tool references, and a clear record of what is validated and what
+                comes next.
+              </p>
+            </div>
+            <div className="guide-grid">
+              {guides.map(({ Icon, title, description, href }) => (
+                <a key={href} className="guide-card" href={href}>
+                  <Icon size={20} aria-hidden="true" />
                   <h3>{title}</h3>
                   <p>{description}</p>
-                </div>
-                <ArrowUpRight size={20} />
-              </a>
-            ))}
-          </div>
-          <a className="text-link" href="#/docs/overview">
-            Browse all documentation <ArrowUpRight size={16} />
-          </a>
-        </section>
-
-        <section className="faq-section container">
-          <div>
-            <span className="section-label">05 / Before you start</span>
-            <h2>A few practical details.</h2>
-          </div>
-          <div className="faq-list">
-            {questions.map(({ question, answer }) => (
-              <details key={question}>
-                <summary>
-                  {question}
-                  <span className="faq-plus" aria-hidden="true">
-                    +
-                  </span>
-                </summary>
-                <p>{answer}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-
-        <section className="closing-section container">
-          <div>
-            <span className="section-label">Your hardware. Your results.</span>
-            <h2>
-              See what
-              <br />
-              runs <em>here.</em>
-            </h2>
-          </div>
-          <div className="closing-action">
-            <p>
-              Start with your runtime.
-              <br />
-              Keep a record of what works.
-            </p>
-            <button className="button dark" onClick={openSetup}>
-              Get started <ArrowRight size={17} />
-            </button>
-            <a href="#/docs/quickstart">
-              Read the documentation <ArrowUpRight size={14} />
+                  <ArrowRight className="guide-arrow" size={18} aria-hidden="true" />
+                </a>
+              ))}
+            </div>
+            <a className="text-link" href="#/docs/overview">
+              <BookOpen size={16} aria-hidden="true" /> Browse all documentation
             </a>
+          </div>
+        </section>
+
+        <section className="section faq-section" id="faq" aria-labelledby="faq-title">
+          <div className="container faq-grid">
+            <div className="section-head">
+              <h2 id="faq-title">Questions, answered.</h2>
+              <p>
+                Still unsure? The <a href="#/docs/overview">documentation overview</a> covers
+                support and limits in detail.
+              </p>
+            </div>
+            <div className="faq-list">
+              {questions.map(({ question, answer }) => (
+                <details key={question}>
+                  <summary>
+                    {question}
+                    <span className="faq-icon" aria-hidden="true" />
+                  </summary>
+                  <p>{answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="closing-band" aria-labelledby="closing-title">
+          <div className="container closing-grid">
+            <h2 id="closing-title">Find out what runs on your machine.</h2>
+            <div className="closing-action">
+              <p>Start with Local AI Doctor. Keep a record of what works.</p>
+              <div className="closing-buttons">
+                <button className="button dark" onClick={openSetup}>
+                  Get started
+                </button>
+                <a className="button outline-dark" href="#/docs/overview">
+                  Read the documentation
+                </a>
+              </div>
+            </div>
           </div>
         </section>
       </main>
-      <footer className="site-footer container">
-        <div className="footer-top">
-          <a href="#" aria-label="DeviceBench home">
-            <Brand />
-          </a>
-          <p>A toolkit for local AI readiness.</p>
-          <div>
-            <a href={repository} target="_blank" rel="noreferrer">
-              GitHub <ArrowUpRight size={13} />
-            </a>
-            <a href="#/docs/overview">Documentation</a>
-            <a href="#/docs/benchmarks">Benchmarks</a>
-            <a href="#/docs/engine-results">Research</a>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <span>DeviceBench / V1 preview · Diagnose. Inspect. Test.</span>
-          <a href="#main">Back to top ↑</a>
-        </div>
-      </footer>
+      <SiteFooter />
       <StartDialog
         key={startOpen ? 'open' : 'closed'}
         open={startOpen}
         onClose={() => setStartOpen(false)}
       />
     </>
+  );
+}
+
+function SiteFooter() {
+  const columns = [
+    {
+      title: 'Product',
+      links: [
+        ['Readiness tools', '#tools'],
+        ['Workflow', '#workflow'],
+        ['Example report', '#product'],
+        ['Questions', '#faq'],
+      ],
+    },
+    {
+      title: 'Documentation',
+      links: [
+        ['Quickstart', '#/docs/quickstart'],
+        ['Tool reference', '#/docs/readiness-toolkit'],
+        ['Benchmarks', '#/docs/benchmarks'],
+        ['Release evidence', '#/docs/readiness-release'],
+      ],
+    },
+    {
+      title: 'Project',
+      links: [
+        ['Source on GitHub', repository],
+        ['Roadmap', '#/docs/roadmap'],
+        ['Engine research', '#/docs/engine-results'],
+        ['Development', '#/docs/development'],
+      ],
+    },
+  ];
+  return (
+    <footer className="site-footer">
+      <div className="container footer-grid">
+        <div className="footer-brand">
+          <a href="#main" aria-label="DeviceBench home">
+            <Brand />
+          </a>
+          <p>Local AI readiness for developers. Diagnose, inspect, and test on your own machine.</p>
+        </div>
+        {columns.map(({ title, links }) => (
+          <div className="footer-column" key={title}>
+            <h2>{title}</h2>
+            <ul>
+              {links.map(([label, href]) => {
+                const external = href.startsWith('http');
+                return (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      target={external ? '_blank' : undefined}
+                      rel={external ? 'noreferrer' : undefined}
+                    >
+                      {label}
+                      {external && <ArrowUpRight size={13} aria-hidden="true" />}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div className="container footer-bottom">
+        <span>DeviceBench V1 preview, version 0.2.0</span>
+        <a href="#main">Back to top</a>
+      </div>
+    </footer>
   );
 }

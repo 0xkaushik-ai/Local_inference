@@ -1,24 +1,39 @@
 # Design system
 
-The website presents DeviceBench as a focused developer product with a restrained,
-editorial visual identity and accurate descriptions of its capabilities.
+The website presents DeviceBench as a precise developer instrument: an identity
+borrowed from test equipment, with accurate descriptions of its capabilities.
+
+## Brand
+
+- The mark is a chip (the device) with three rising bars (the measurement); the
+  tallest bar carries the signal yellow. `src/components/Brand.tsx` renders it with
+  the `DeviceBench` wordmark. `public/assets/favicon.svg` adapts it to dark browser
+  chrome, and `public/assets/og-image.png` and `apple-touch-icon.png` are rendered
+  from the same geometry. Keep the mark's proportions; do not recolor the chip.
+- The local dashboard in `src/devicebench/readiness/web/` at the repository root uses
+  the same mark, favicon, and neutral and signal tokens. Its stylesheet is separate
+  from the React website and uses system fonts because its content security policy
+  allows no font downloads.
 
 ## Visual foundation
 
-- Warm off-white canvas, charcoal text, and a restrained rust accent.
-  Color, border, radius, shadow, and base typography tokens live in `src/styles.css`.
-  The local dashboard uses the same canvas (`#f6f5f1`), ink (`#242521`), accent
-  (`#a43725`), and measurement mark in `src/devicebench/readiness/web/` at the
-  repository root. Its stylesheet is separate from the React website.
-- Locally bundled IBM Plex Sans and IBM Plex Mono. Marketing body copy is generally 15–20px;
-  the companion uses system fonts without a font download. Page headings use
-  responsive sizing and limited line lengths. Display type uses lighter weights,
-  deliberate line breaks, and tighter spacing; numerical labels use monospace.
-- One filled primary action and a text link for the secondary action.
-  Navigation, tabs, copy, export, and setup controls use consistent states and sizing.
-- Reports put findings, next steps, and evidence within reach. Decorative layers
-  never cover controls or content. Thin dividers organize the page; repeated
-  decorative cards and abstract illustrations are avoided.
+- White paper (`#ffffff`), graphite ink (`#15171b`), cool neutral lines
+  (`#e3e5e8`), and instrument yellow (`#f2b705`). Yellow is a fill only (primary
+  buttons, the mark, link underlines, selection markers) and never carries text
+  on white. Dark mode follows the system preference with its own token values.
+  Color, border, radius, shadow, and type tokens live in `src/styles.css`.
+- Status colors are reserved for results: pass green, review amber, fail red, and
+  neutral information. Chart series use the validated blue, orange, and aqua set
+  shared with the dashboard's memory meter, with a legend and values beside every
+  bar.
+- Locally bundled IBM Plex Sans and IBM Plex Mono. Headlines use Plex Sans at a
+  condensed width (84–88%) with tight tracking; body copy is 15–19px. Monospace is
+  for commands, addresses, and numeric readouts, not for decorative labels.
+- One filled primary action (yellow) and an outlined or underlined secondary
+  action. Sentence case throughout; no all-caps eyebrows above headings.
+- The hero's memory-fit demo uses the Model & Context Checker's formula with
+  clearly labeled sample inputs. Reports put findings, next steps, and evidence
+  within reach. Decorative layers never cover controls or content.
 - Runtime names link to the relevant setup or research documentation. They do not
   imply customer endorsements or partnerships.
 
@@ -69,8 +84,9 @@ not execution evidence.
 
 ## Information architecture
 
-Lead with the three V1 readiness tools, then explain diagnose, inspect, test, and
-export as the customer workflow. Follow with clearly labeled examples of the same
+Open with the question the product answers and the interactive memory-fit demo.
+Then present the three V1 readiness tools, explain diagnose, inspect, test, and
+export as the customer workflow, and follow with clearly labeled examples of the same
 three readiness reports and their next steps. Benchmarks and CPU research belong
 in advanced documentation; benchmark controls are deferred. Every tool has a guide;
 installation, support scope, report semantics, and V1 preview status are accessible
@@ -82,8 +98,11 @@ remain separate prerequisites. Describe this candidate as a portable Linux
 preview with manual updates; public availability, signing, other Linux systems,
 and Windows/macOS apps require their own release evidence.
 
-The documentation reader uses the same type and color tokens, a restrained sidebar,
-readable prose, horizontally scrollable code/tables, and an optional desktop
-section outline. Guides come from the repository Markdown, avoiding a separate
-copy of product claims. Preserve working hash URLs and keyboard focus when moving
-between documents and sections.
+The documentation reader uses the same type and color tokens, a grouped sidebar
+(an off-canvas menu below 1024px), readable prose, copyable code blocks,
+horizontally scrollable tables, previous and next links, and a desktop section
+outline that follows scrolling. Search (Ctrl K, ⌘K, or `/`) covers every page and
+section heading with keyboard navigation. Guides come from the repository Markdown,
+avoiding a separate copy of product claims. Preserve working hash URLs and keyboard
+focus when moving between documents and sections; the rendered article is memoized
+so that menu, search, and outline state never remount its headings.

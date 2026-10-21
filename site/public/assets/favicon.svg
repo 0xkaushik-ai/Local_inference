@@ -1,1 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="4" fill="#f6f5f1"/><path d="M9 7H5v18h4M23 7h4v18h-4" fill="none" stroke="#242521" stroke-width="2"/><path d="M12 21v-5m4 5V11m4 10V7" stroke="#a43725" stroke-width="2.5"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .pins { stroke: #15171b; stroke-width: 2; stroke-linecap: round; }
+    .chip { fill: #15171b; }
+    .bar { fill: #ffffff; }
+    .accent { fill: #f2b705; }
+    @media (prefers-color-scheme: dark) {
+      .pins { stroke: #eceef1; }
+      .chip { fill: #eceef1; }
+      .bar { fill: #15171b; }
+      .accent { fill: #c58f00; }
+    }
+  </style>
+  <path class="pins" d="M2.5 11h3M2.5 16h3M2.5 21h3M26.5 11h3M26.5 16h3M26.5 21h3" />
+  <rect class="chip" x="6" y="5" width="20" height="22" rx="4.5" />
+  <rect class="bar" x="10" y="17" width="3" height="5" rx="1" />
+  <rect class="bar" x="14.5" y="13" width="3" height="9" rx="1" />
+  <rect class="accent" x="19" y="9" width="3" height="13" rx="1" />
+</svg>

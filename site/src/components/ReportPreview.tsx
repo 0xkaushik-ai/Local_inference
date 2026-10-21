@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   ArrowDownToLine,
-  ArrowUpRight,
+  ArrowRight,
   Cable,
   Check,
   Cpu,
@@ -9,10 +9,20 @@ import {
   Info,
   LayoutDashboard,
   ListChecks,
-  Plus,
+  Minus,
   Stethoscope,
+  TriangleAlert,
 } from 'lucide-react';
+import { LogoMark } from './Brand';
 import { navigateTabs } from '../lib/tabs';
+
+const statusLabels: Record<string, string> = {
+  pass: 'Passed',
+  info: 'Information',
+  warning: 'Review',
+  unsupported: 'Unsupported',
+};
+const statusIcons = { pass: Check, info: Info, warning: TriangleAlert, unsupported: Minus };
 
 const examples = [
   {
@@ -137,175 +147,190 @@ export default function ReportPreview({ onStart }: { onStart: () => void }) {
   return (
     <div className="report-stage" id="product">
       <div className="product-intro">
-        <div>
-          <span className="section-label">Inside DeviceBench</span>
-          <h2>From a finding to a next step.</h2>
+        <div className="section-head">
+          <h2>See a report before you run one.</h2>
+          <p>
+            Every check ends with a plain verdict, the findings behind it, and a next step. Pick a
+            tool to explore a sample report.
+          </p>
         </div>
-        <span className="sample-badge">Interactive example · Sample data</span>
+        <span className="sample-badge">Sample data</span>
       </div>
       <div className="report-window readiness-preview">
-        <aside className="report-sidebar" aria-label="Example workspace">
-          <div className="workspace-label">
-            <span className="workspace-icon">
-              <Cpu size={19} />
-            </span>
-            <span>
-              Local workspace<small>DeviceBench / V1 preview</small>
-            </span>
+        <div className="window-bar">
+          <span className="window-dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="window-title">DeviceBench dashboard</span>
+          <span className="window-address" translate="no">
+            127.0.0.1:8766
+          </span>
+        </div>
+        <div className="report-frame">
+          <div className="report-sidebar" role="group" aria-label="Example workspace">
+            <div className="workspace-label">
+              <LogoMark className="workspace-mark" />
+              <span>
+                Sample workspace<small>No hardware checked here</small>
+              </span>
+            </div>
+            <div className="sidebar-heading" aria-hidden="true">
+              Sample reports
+            </div>
+            <div className="sample-steps" role="group" aria-label="Choose a sample report">
+              {examples.map(({ id, short, Icon }, i) => (
+                <button
+                  key={id}
+                  className={`experiment${tool === i ? ' selected' : ''}`}
+                  aria-pressed={tool === i}
+                  onClick={() => {
+                    setTool(i);
+                    setTab('overview');
+                  }}
+                >
+                  <Icon size={16} aria-hidden="true" />
+                  <span>{short}</span>
+                </button>
+              ))}
+            </div>
+            <button className="new-run" onClick={onStart}>
+              Check my setup <ArrowRight size={15} aria-hidden="true" />
+            </button>
           </div>
-          <button className="new-run" onClick={onStart}>
-            <Plus size={16} /> Check my setup
-          </button>
-          <div className="sidebar-heading">EXPLORE THE TOOLS</div>
-          <div role="group" aria-label="Choose a sample report">
-            {examples.map(({ id, short, Icon }, i) => (
+          <div className="report-main">
+            <div className="report-toolbar">
+              <span>
+                <selected.Icon size={15} aria-hidden="true" /> Readiness report
+              </span>
               <button
-                key={id}
-                className={`experiment${tool === i ? ' selected' : ''}`}
-                aria-pressed={tool === i}
-                onClick={() => {
-                  setTool(i);
+                className="download-button"
+                onClick={downloadExample}
+                aria-label="Download example JSON"
+              >
+                <ArrowDownToLine size={15} aria-hidden="true" />
+                <span>Example JSON</span>
+              </button>
+            </div>
+            <div className="sample-tool-picker">
+              <label htmlFor="sample-tool">Example tool</label>
+              <select
+                id="sample-tool"
+                value={tool}
+                onChange={(event) => {
+                  setTool(Number(event.target.value));
                   setTab('overview');
                 }}
               >
-                <Icon size={16} />
-                <span>{short}</span>
-              </button>
-            ))}
-          </div>
-          <div className="sidebar-context">
-            <Info size={16} />
-            <span>
-              Illustrative reports<small>No hardware checked here.</small>
-            </span>
-          </div>
-        </aside>
-        <div className="report-main">
-          <div className="report-toolbar">
-            <span>
-              <selected.Icon size={15} /> Readiness report
-            </span>
-            <button
-              className="download-button"
-              onClick={downloadExample}
-              aria-label="Download example JSON"
-            >
-              <ArrowDownToLine size={15} />
-              <span>Example JSON</span>
-            </button>
-          </div>
-          <div className="sample-tool-picker">
-            <label htmlFor="sample-tool">Example tool</label>
-            <select
-              id="sample-tool"
-              value={tool}
-              onChange={(event) => {
-                setTool(Number(event.target.value));
-                setTab('overview');
-              }}
-            >
-              {examples.map(({ id, name }, i) => (
-                <option key={id} value={i}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div
-            className="report-tabs"
-            role="tablist"
-            aria-label="Report views"
-            onKeyDown={navigateTabs}
-          >
-            {tabs.map(({ id, name, Icon }) => (
-              <button
-                key={id}
-                role="tab"
-                tabIndex={tab === id ? 0 : -1}
-                aria-selected={tab === id}
-                aria-controls="report-view"
-                id={`tab-${id}`}
-                onClick={() => setTab(id)}
-              >
-                <Icon size={15} />
-                {name}
-              </button>
-            ))}
-          </div>
-          <div
-            className="report-body"
-            id="report-view"
-            role="tabpanel"
-            aria-labelledby={`tab-${tab}`}
-            tabIndex={0}
-          >
-            <div className="report-title">
-              <div>
-                <h3>{selected.name}</h3>
-                <p>{selected.context}</p>
-              </div>
+                {examples.map(({ id, name }, i) => (
+                  <option key={id} value={i}>
+                    {name}
+                  </option>
+                ))}
+              </select>
             </div>
-            {tab === 'overview' && (
-              <>
-                <div className="readiness-summary">
-                  <h4>{selected.summary}</h4>
-                  <p>{selected.detail}</p>
-                </div>
-                <div className="sample-findings">
-                  {selected.findings.map((finding) => (
-                    <article key={finding.title}>
-                      <div>
-                        <h4>{finding.title}</h4>
-                        <span className={`sample-status ${finding.status}`}>
-                          {finding.status === 'info'
-                            ? 'Information'
-                            : finding.status === 'warning'
-                              ? 'Review'
-                              : finding.status === 'pass'
-                                ? 'Passed'
-                                : 'Unsupported'}
-                        </span>
-                      </div>
-                      <p>{finding.detail}</p>
-                    </article>
-                  ))}
-                </div>
-                <button className="text-button sample-next" onClick={() => setTab('next')}>
-                  Understand the next step <ArrowUpRight size={15} />
-                </button>
-              </>
-            )}
-            {tab === 'next' && (
-              <div className="sample-next-panel">
-                <ListChecks size={28} strokeWidth={1.4} />
-                <h4>What to do with this finding</h4>
-                <p>{selected.next}</p>
-                <a
-                  className="text-link"
-                  href={`#/docs/readiness-toolkit?section=${selected.guide}`}
+            <div
+              className="report-tabs"
+              role="tablist"
+              aria-label="Report views"
+              onKeyDown={navigateTabs}
+            >
+              {tabs.map(({ id, name, Icon }) => (
+                <button
+                  key={id}
+                  role="tab"
+                  tabIndex={tab === id ? 0 : -1}
+                  aria-selected={tab === id}
+                  aria-controls="report-view"
+                  id={`tab-${id}`}
+                  onClick={() => setTab(id)}
                 >
-                  Read the tool guide <ArrowUpRight size={15} />
-                </a>
-                <button className="button dark" onClick={onStart}>
-                  Check your own setup <ArrowUpRight size={15} />
+                  <Icon size={15} aria-hidden="true" />
+                  {name}
                 </button>
+              ))}
+            </div>
+            <div
+              className="report-body"
+              id="report-view"
+              role="tabpanel"
+              aria-labelledby={`tab-${tab}`}
+              tabIndex={0}
+            >
+              <div className="report-title">
+                <div>
+                  <h3>{selected.name}</h3>
+                  <p>{selected.context}</p>
+                </div>
               </div>
-            )}
-            {tab === 'evidence' && (
-              <div className="raw-evidence">
-                <p>
-                  Sample data for this preview. A real report contains the findings observed on your
-                  machine.
-                </p>
-                <pre tabIndex={0} aria-label="Illustrative report JSON">
-                  {JSON.stringify(evidence, null, 2)}
-                </pre>
-              </div>
-            )}
-          </div>
-          <div className="report-bottom">
-            <Check size={14} /> Example only. Your local results depend on your runtime, model, and
-            device.
+              {tab === 'overview' && (
+                <>
+                  <div
+                    className={`readiness-summary${selected.findings.some((item) => item.status !== 'pass' && item.status !== 'info') ? ' needs-review' : ''}`}
+                  >
+                    <h4>{selected.summary}</h4>
+                    <p>{selected.detail}</p>
+                  </div>
+                  <div className="sample-findings">
+                    {selected.findings.map((finding) => {
+                      const StatusIcon =
+                        statusIcons[finding.status as keyof typeof statusIcons] ?? Info;
+                      return (
+                        <article key={finding.title} data-status={finding.status}>
+                          <span className="sample-icon" aria-hidden="true">
+                            <StatusIcon size={13} strokeWidth={2.5} />
+                          </span>
+                          <div>
+                            <div className="sample-finding-top">
+                              <h4>{finding.title}</h4>
+                              <span className={`sample-status ${finding.status}`}>
+                                {statusLabels[finding.status] ?? 'Information'}
+                              </span>
+                            </div>
+                            <p>{finding.detail}</p>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                  <button className="text-button sample-next" onClick={() => setTab('next')}>
+                    Understand the next step <ArrowRight size={15} aria-hidden="true" />
+                  </button>
+                </>
+              )}
+              {tab === 'next' && (
+                <div className="sample-next-panel">
+                  <ListChecks size={26} strokeWidth={1.6} aria-hidden="true" />
+                  <h4>What to do with this finding</h4>
+                  <p>{selected.next}</p>
+                  <a
+                    className="text-link"
+                    href={`#/docs/readiness-toolkit?section=${selected.guide}`}
+                  >
+                    Read the tool guide <ArrowRight size={15} aria-hidden="true" />
+                  </a>
+                  <button className="button dark" onClick={onStart}>
+                    Check your own setup
+                  </button>
+                </div>
+              )}
+              {tab === 'evidence' && (
+                <div className="raw-evidence">
+                  <p>
+                    Sample data for this preview. A real report contains the findings observed on
+                    your machine.
+                  </p>
+                  <pre tabIndex={0} aria-label="Illustrative report JSON">
+                    {JSON.stringify(evidence, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+            <div className="report-bottom">
+              <Info size={14} aria-hidden="true" /> Example only. Your local results depend on your
+              runtime, model, and device.
+            </div>
           </div>
         </div>
       </div>

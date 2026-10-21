@@ -6,7 +6,7 @@ test('readiness examples remain labeled and export the selected findings', async
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Ready for');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Know if local AI');
   await expect(page.locator('.hero-kicker')).toContainText('V1 preview');
   await expect(page.locator('.sample-badge')).toContainText('Sample data');
   await page.getByRole('button', { name: 'Test app features', exact: true }).click();

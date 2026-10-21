@@ -1,27 +1,33 @@
 :root {
   color-scheme: light;
-  --canvas: #f6f5f1;
-  --rail: #efeee8;
+  --canvas: #f5f6f7;
+  --rail: #eef0f2;
   --surface: #fff;
-  --sunken: #efeee9;
-  --ink: #242521;
-  --ink-hover: #3d3f38;
-  --muted: #5d5f57;
-  --line: #dcdcd4;
-  --line-strong: #bfc1b8;
-  --accent: #a43725;
-  --pass: #2f6b4f;
-  --pass-soft: #e4eee7;
-  --review: #81560f;
-  --review-soft: #f6eedb;
-  --danger: #a3301f;
-  --danger-soft: #f8e6e0;
-  --info: #4c5560;
-  --info-soft: #ebecef;
+  --sunken: #eceef1;
+  --ink: #15171b;
+  --ink-hover: #30353c;
+  --muted: #555b64;
+  --line: #e3e5e8;
+  --line-strong: #c9cdd3;
+  --focus: #15171b;
+  --yellow: #f2b705;
+  --yellow-hover: #ffc929;
+  --yellow-edge: #d9a300;
+  --pass: #1e7a4f;
+  --pass-soft: #e3f3ea;
+  --review: #855600;
+  --review-soft: #fdf0d5;
+  --danger: #b42318;
+  --danger-soft: #fde8e6;
+  --info: #475467;
+  --info-soft: #eef0f3;
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
-  --shadow: 0 1px 2px rgb(36 37 33 / 6%), 0 6px 20px rgb(36 37 33 / 5%);
+  --logo-chip: #15171b;
+  --logo-bar: #fff;
+  --logo-accent: #f2b705;
+  --shadow: 0 1px 2px rgb(21 23 27 / 6%), 0 6px 20px rgb(21 23 27 / 5%);
   --radius-panel: 10px;
   --radius-control: 7px;
   --sans:
@@ -37,24 +43,30 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --canvas: #191a17;
-    --rail: #1e1f1c;
-    --surface: #232420;
-    --sunken: #2b2c28;
-    --ink: #ecebe4;
+    --canvas: #0f1114;
+    --rail: #131619;
+    --surface: #171a1f;
+    --sunken: #1e2227;
+    --ink: #eceef1;
     --ink-hover: #fff;
-    --muted: #a8a99f;
-    --line: #383934;
-    --line-strong: #4e4f48;
-    --accent: #e58a6f;
-    --pass: #8fd0ab;
-    --pass-soft: #1f3328;
-    --review: #e7bf6a;
-    --review-soft: #3a3020;
-    --danger: #f29a84;
-    --danger-soft: #3d241f;
+    --muted: #a3a9b3;
+    --line: #262a30;
+    --line-strong: #3a3f47;
+    --focus: #f5c53a;
+    --yellow: #f5c53a;
+    --yellow-hover: #ffd35c;
+    --yellow-edge: #f5c53a;
+    --pass: #6fcf97;
+    --pass-soft: #12261b;
+    --review: #f2c46d;
+    --review-soft: #2b2210;
+    --danger: #ff8a7a;
+    --danger-soft: #2e1513;
     --info: #b9c0c9;
-    --info-soft: #2c2f33;
+    --info-soft: #1e2227;
+    --logo-chip: #eceef1;
+    --logo-bar: #15171b;
+    --logo-accent: #c58f00;
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
@@ -89,7 +101,7 @@ button:disabled {
   opacity: 0.5;
 }
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 [hidden] {
@@ -153,14 +165,13 @@ a {
 .primary {
   min-height: 44px;
   padding: 0 22px;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--canvas);
+  border: 1px solid var(--yellow-edge);
+  background: var(--yellow);
+  color: #15171b;
   font-size: 15px;
 }
 .primary:hover:not(:disabled) {
-  background: var(--ink-hover);
-  border-color: var(--ink-hover);
+  background: var(--yellow-hover);
 }
 .secondary {
   min-height: 40px;
@@ -186,14 +197,17 @@ a {
   border: 0;
   padding: 6px 0;
   background: none;
-  color: var(--accent);
+  color: var(--ink);
   font-size: 13px;
   font-weight: 600;
   text-align: left;
+  text-decoration: underline;
+  text-decoration-color: var(--yellow-edge);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 .text-button:hover:not(:disabled) {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-color: var(--ink);
 }
 .chip {
   min-height: 30px;
@@ -242,21 +256,33 @@ a {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   color: var(--ink);
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 650;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   text-decoration: none;
   align-self: center;
 }
 .brand svg {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 }
-.brand-bars {
-  stroke: var(--accent);
+.logo-pins {
+  fill: none;
+  stroke: var(--logo-chip);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.logo-chip {
+  fill: var(--logo-chip);
+}
+.logo-bar {
+  fill: var(--logo-bar);
+}
+.logo-bar-accent {
+  fill: var(--logo-accent);
 }
 .version {
   color: var(--muted);
@@ -612,7 +638,7 @@ select:hover:not(:disabled) {
   background: var(--sunken);
 }
 .check:has(input:focus-visible) {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 fieldset:disabled .check {
@@ -1236,7 +1262,7 @@ dialog {
   overscroll-behavior: contain;
 }
 dialog::backdrop {
-  background: rgb(25 26 23 / 45%);
+  background: rgb(15 17 20 / 55%);
 }
 .dialog-header {
   display: flex;
@@ -1275,7 +1301,7 @@ dialog p {
   padding-left: 6px;
 }
 .help-steps li::marker {
-  color: var(--accent);
+  color: var(--ink);
   font-weight: 650;
 }
 .help-steps > li > strong {
@@ -1398,7 +1424,7 @@ dialog details {
     gap: 0;
   }
   .version {
-    padding-left: 34px;
+    padding-left: 37px;
   }
   .connection {
     display: flex;
