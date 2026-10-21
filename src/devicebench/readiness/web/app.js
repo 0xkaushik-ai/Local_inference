@@ -7,30 +7,33 @@ const token = document.querySelector(
 const tools = {
   doctor: {
     name: "Local AI Doctor",
-    step: "01 / SETUP",
+    step: 1,
     action: "Run diagnostics",
     description:
-      "Check your connection, model inventory, and available hardware information.",
+      "Check that DeviceBench can reach your local AI server, and see your installed models and hardware.",
     empty: "Start with your setup.",
     hint: "Run diagnostics to check your local AI server and hardware.",
+    note: "Reads local information. Does not install or load models.",
   },
   inspect: {
     name: "Model & Context Checker",
-    step: "02 / MODEL",
+    step: 2,
     action: "Inspect model",
     description:
-      "Choose a model and the context your app needs. See declared limits and estimated memory.",
+      "Choose a model and the context your app needs. See its declared limits and an estimate of the memory it needs.",
     empty: "Understand your model.",
     hint: "Choose an installed model and context length, then inspect its requirements.",
+    note: "Reads metadata. Estimates do not guarantee that a model will load.",
   },
   compat: {
     name: "App Compatibility Tester",
-    step: "03 / APP",
-    action: "Test integration",
+    step: 3,
+    action: "Test selected features",
     description:
-      "Choose the capabilities your app uses. Each check sends a small request to your model.",
+      "Choose the features your app uses. Each check sends a small request to your model.",
     empty: "Check the features your app needs.",
     hint: "Select a model and the features to test. These checks may load a model.",
+    note: "Sends small test requests. Models may stay loaded for five minutes. Tool calls are checked, never executed.",
   },
 };
 const labels = {
@@ -41,17 +44,95 @@ const labels = {
   unsupported: "Unsupported",
   unavailable: "Unavailable",
 };
+const statusIcons = {
+  pass: "check",
+  fail: "x",
+  info: "info",
+  warning: "alert",
+  unsupported: "minus",
+  unavailable: "x",
+};
+const stepStatus = {
+  idle: "Not checked yet",
+  done: "Checked",
+  attention: "Needs attention",
+};
 const presets = {
   chatbot: ["streaming"],
   extraction: ["json"],
   assistant: ["streaming", "tools"],
   search: ["embeddings"],
 };
+const iconPaths = {
+  check: ["M20 6 9 17l-5-5"],
+  x: ["M18 6 6 18", "m6 6 12 12"],
+  minus: ["M5 12h14"],
+  alert: ["M12 7v6", "M12 17h.01"],
+  info: ["M12 11v6", "M12 7h.01"],
+  activity: ["M3 12h4l3-8 4 16 3-8h4"],
+  chip: [
+    "M7 7h10v10H7z",
+    "M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4",
+  ],
+  plug: ["M9 3v5M15 3v5", "M6 8h12v3a6 6 0 0 1-12 0z", "M12 17v4"],
+};
+const emptyIcons = { doctor: "activity", inspect: "chip", compat: "plug" };
+const GIB = 1024 ** 3;
+// Drawing only: checks.py owns the fit verdict and uses the same 85% budget.
+const BUDGET_SHARE = 0.85;
 let activeTool = "doctor";
 let busy = false;
 let currentReport = null;
 let launchMode = null;
 const reports = new Map();
+
+function icon(name) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("class", "icon");
+  for (const d of iconPaths[name]) {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    svg.append(path);
+  }
+  return svg;
+}
+
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function positive(value) {
+  return Number.isFinite(value) && value > 0;
+}
+
+const oneDecimal = new Intl.NumberFormat(undefined, {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+const twoDecimals = new Intl.NumberFormat(undefined, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+function gib(bytes) {
+  const format = bytes >= 10 * GIB ? oneDecimal : twoDecimals;
+  return `${format.format(bytes / GIB)} GiB`;
+}
+
+function protocolName(protocol) {
+  return protocol === "openai" ? "OpenAI-compatible" : "Ollama native";
+}
+
+function blocked(report) {
+  return report.findings.some((item) =>
+    ["fail", "unsupported", "unavailable"].includes(item.status),
+  );
+}
 
 function requestFor(tool) {
   const request = { tool, protocol: $("protocol").value };
@@ -70,7 +151,9 @@ function requestFor(tool) {
 
 function updateControls() {
   document
-    .querySelectorAll("form button, form input, form select, .tool-card")
+    .querySelectorAll(
+      "form button, form input, form select, .tool-card, #protocol, #recheck",
+    )
     .forEach((element) => {
       element.disabled = busy;
     });
@@ -84,11 +167,32 @@ function updateControls() {
     busy ||
     activeTool !== "compat" ||
     !document.querySelector('input[value="embeddings"]').checked;
-  $("run").textContent = busy ? "Checking…" : `${tools[activeTool].action} →`;
+  $("run").textContent = busy ? "Checking…" : tools[activeTool].action;
   $("next-step").disabled = busy;
   $("findings").setAttribute("aria-busy", String(busy));
+  document.body.classList.toggle("is-busy", busy);
   for (const id of ["export-json", "export-html"])
     $(id).disabled = busy || !currentReport;
+  const context = Number($("context").value);
+  document.querySelectorAll("[data-context]").forEach((chip) => {
+    chip.setAttribute(
+      "aria-pressed",
+      String(Number(chip.dataset.context) === context),
+    );
+  });
+}
+
+function updateSteps() {
+  document.querySelectorAll(".tool-card").forEach((element) => {
+    const saved = reports.get(element.dataset.tool);
+    const state = !saved
+      ? "idle"
+      : blocked(saved.report)
+        ? "attention"
+        : "done";
+    element.dataset.state = state;
+    element.querySelector(".step-status").textContent = stepStatus[state];
+  });
 }
 
 function selectTool(tool) {
@@ -99,19 +203,13 @@ function selectTool(tool) {
     element.classList.toggle("selected", selected);
     element.setAttribute("aria-pressed", String(selected));
   });
-  $("tool-heading").textContent = tools[tool].name;
-  $("step-label").textContent = `STEP ${tools[tool].step}`;
+  $("step-label").textContent = `Step ${tools[tool].step} of 3`;
   $("tool-description").textContent = tools[tool].description;
   $("model-controls").hidden = tool === "doctor";
   $("context-controls").hidden = tool !== "inspect";
   $("feature-controls").hidden = tool !== "compat";
   $("app-controls").hidden = tool !== "compat";
-  $("request-note").textContent =
-    tool === "compat"
-      ? "Sends small test requests. Models may stay loaded for five minutes. Tool calls are checked, never executed."
-      : tool === "inspect"
-        ? "Reads metadata. Estimates do not guarantee that a model will load."
-        : "Reads local information. Does not install or load models.";
+  $("request-note").textContent = tools[tool].note;
   $("error").hidden = true;
   renderActive();
 }
@@ -156,10 +254,12 @@ function updateConnection(report) {
       : "No models"
     : "Unavailable";
   $("connection-dot").className =
-    `connection-dot ${connected ? "connected" : "unavailable"}`;
+    `connection-dot ${connected ? (count ? "connected" : "warning") : "unavailable"}`;
   $("connection-summary").textContent = connected
-    ? `${$("protocol").selectedOptions[0].textContent} · ${count} installed ${count === 1 ? "model" : "models"}`
-    : "Start your local server, check its address, and run Doctor again.";
+    ? count
+      ? `${count} ${count === 1 ? "model" : "models"} installed.`
+      : "Connected, but no models are installed yet."
+    : "Start your local server, check its address, and check again.";
 }
 
 function clearReport() {
@@ -171,31 +271,42 @@ function clearReport() {
     "outcome",
     "next-step",
     "report-context",
+    "snapshot",
     "export-note",
   ])
     $(id).hidden = true;
   $("raw").open = false;
   $("raw-json").textContent = "";
   $("report-scope").textContent = "";
-  $("report-context").textContent = "";
+  $("report-context-list").replaceChildren();
+  $("snapshot").replaceChildren();
   $("findings").replaceChildren();
 }
 
 function showEmpty() {
-  const empty = document.createElement("div");
-  empty.className = "empty";
-  const mark = document.createElement("span");
-  mark.className = "empty-mark";
-  mark.setAttribute("aria-hidden", "true");
-  mark.textContent = tools[activeTool].step.slice(0, 2);
-  const title = document.createElement("h3");
-  title.textContent = tools[activeTool].empty;
-  const description = document.createElement("p");
-  description.textContent =
-    activeTool !== "doctor" && !$("model").value
-      ? "No installed models are available. Use Local AI Doctor to check your connection, or refresh the model list after installing a model in your server."
-      : tools[activeTool].hint;
+  const empty = element("div", "empty");
+  const mark = element("span", "empty-mark");
+  mark.append(icon(emptyIcons[activeTool]));
+  const noModel = activeTool !== "doctor" && !$("model").value;
+  const title = element(
+    "h3",
+    "",
+    noModel ? "No installed models yet." : tools[activeTool].empty,
+  );
+  const description = element(
+    "p",
+    "",
+    noModel
+      ? "Use Local AI Doctor to check your connection, or refresh the model list after installing a model in your server."
+      : tools[activeTool].hint,
+  );
   empty.append(mark, title, description);
+  if (noModel) {
+    const back = element("button", "secondary small", "Open Local AI Doctor");
+    back.type = "button";
+    back.addEventListener("click", () => selectTool("doctor"));
+    empty.append(back);
+  }
   $("findings").append(empty);
   $("status").textContent =
     "No report for these settings yet. Run a check to see your results.";
@@ -203,10 +314,7 @@ function showEmpty() {
 
 function showOutcome(report) {
   const statuses = new Set(report.findings.map((item) => item.status));
-  const blocked =
-    statuses.has("fail") ||
-    statuses.has("unsupported") ||
-    statuses.has("unavailable");
+  const isBlocked = blocked(report);
   let title, description;
   let next = null;
   if (activeTool === "doctor") {
@@ -225,25 +333,29 @@ function showOutcome(report) {
         ? "Your installed models are available. Choose one to explore its context and memory requirements."
         : "Install a model through your AI server, then run diagnostics again to find it here.";
     if (connected && models.length)
-      next = ["inspect", "Next: inspect a model →"];
+      next = ["inspect", "Continue to Model & Context"];
   } else if (activeTool === "inspect") {
-    title = blocked
+    title = isBlocked
       ? "Review your model settings."
       : "Your model details are ready.";
-    description = blocked
+    description = isBlocked
       ? "Check the findings below before continuing with this model and context."
       : "Review the context limit, memory estimate, and any missing information. You can then test the API features your app needs.";
-    if (!blocked) next = ["compat", "Next: test app features →"];
+    if (!isBlocked) next = ["compat", "Continue to App Compatibility"];
   } else {
-    title = blocked
+    title = isBlocked
       ? "Some requirements need attention."
       : "Selected checks passed.";
-    description = blocked
+    description = isBlocked
       ? "Review failed, unsupported, or unavailable features below. Adjust your model or requirements and run the checks again."
       : "Your model returned the expected responses for these checks. Download the evidence and validate your own app’s workload before deployment.";
   }
+  const review = isBlocked || statuses.has("warning");
   $("outcome").className =
-    `outcome ${blocked || statuses.has("warning") ? "needs-review" : ""}`;
+    `outcome${review ? " needs-review" : ""}${isBlocked ? " blocked" : ""}`;
+  $("outcome-icon").replaceChildren(
+    icon(isBlocked ? "x" : review ? "alert" : "check"),
+  );
   $("outcome-title").textContent = title;
   $("outcome-description").textContent = description;
   $("outcome").hidden = false;
@@ -254,6 +366,203 @@ function showOutcome(report) {
   }
 }
 
+function stat(list, label, value, detail) {
+  const item = element("div", "stat");
+  item.append(element("dt", "", label));
+  const content = element("dd", "", value);
+  if (detail) content.append(element("span", "stat-detail", detail));
+  item.append(content);
+  list.append(item);
+}
+
+function deviceSnapshot(report) {
+  const hardware = report.hardware || {};
+  const memory = hardware.memory || {};
+  const stats = element("dl", "stats");
+  stat(
+    stats,
+    "Free memory",
+    positive(memory.available_bytes)
+      ? gib(memory.available_bytes)
+      : "Not measured",
+    positive(memory.total_bytes) ? `of ${gib(memory.total_bytes)}` : null,
+  );
+  stat(
+    stats,
+    "Processor",
+    positive(hardware.logical_cpus)
+      ? `${hardware.logical_cpus} logical CPUs`
+      : "Not detected",
+  );
+  stat(
+    stats,
+    "System",
+    [hardware.system, hardware.machine].filter(Boolean).join(" ") ||
+      "Not detected",
+  );
+  stat(
+    stats,
+    "Runtime",
+    protocolName(report.protocol),
+    report.runtime_version
+      ? `Version ${report.runtime_version}`
+      : "Version not reported",
+  );
+  const models = report.models || [];
+  const heading = element("h3", "snapshot-heading", "Installed models");
+  heading.append(element("span", "count", String(models.length)));
+  const parts = [stats, heading];
+  if (!models.length) {
+    const connected = report.findings.some(
+      (item) => item.id === "runtime" && item.status === "pass",
+    );
+    parts.push(
+      element(
+        "p",
+        "snapshot-empty",
+        connected
+          ? "No models are installed yet. Install one through your AI server, then choose Check again."
+          : "Models appear here once DeviceBench can reach your AI server.",
+      ),
+    );
+    return parts;
+  }
+  const list = element("ul", "model-list");
+  for (const model of models) {
+    const item = element("li");
+    const name = element("span", "model-name", model.name);
+    name.translate = false;
+    item.append(name);
+    const tags = element("span", "model-tags");
+    const details = model.details || {};
+    for (const tag of [
+      positive(model.size) ? gib(model.size) : null,
+      details.parameter_size,
+      details.quantization_level,
+      model.remote_host ? "Remote" : null,
+    ])
+      if (typeof tag === "string" && tag)
+        tags.append(element("span", "tag", tag));
+    item.append(tags);
+    list.append(item);
+  }
+  parts.push(list);
+  return parts;
+}
+
+function memorySnapshot(report, request) {
+  const estimate = report.findings.find((item) => item.id === "estimate");
+  const evidence = estimate && estimate.evidence;
+  if (!evidence || !positive(evidence.estimated_total_bytes)) return null;
+  const total = evidence.estimated_total_bytes;
+  const memory = (report.hardware && report.hardware.memory) || {};
+  const available = positive(memory.available_bytes)
+    ? memory.available_bytes
+    : null;
+  const pool = report.findings.find((item) => item.id === "pool-0");
+  const fit =
+    !available || !pool
+      ? "unknown"
+      : pool.status === "info"
+        ? "fits"
+        : "exceeds";
+  const budget = available ? Math.floor(available * BUDGET_SHARE) : null;
+  const scale = Math.max(available || 0, total);
+
+  const meter = element("div", "meter");
+  meter.dataset.fit = fit;
+  const head = element("div", "meter-head");
+  const title = element("div");
+  title.append(
+    element("h3", "", "Estimated memory"),
+    element("p", "meter-pool", "System RAM"),
+  );
+  const figure = element("p", "meter-total", gib(total));
+  head.append(title, figure);
+  const verdict = element("p", "meter-verdict");
+  verdict.append(
+    icon(fit === "fits" ? "check" : fit === "exceeds" ? "alert" : "info"),
+    document.createTextNode(
+      fit === "fits"
+        ? `Fits within the ${gib(budget)} budget.`
+        : fit === "exceeds"
+          ? `Exceeds the ${gib(budget)} budget.`
+          : "Free memory was not measured, so no fit is shown.",
+    ),
+  );
+
+  const track = element("div", "meter-track");
+  track.setAttribute("aria-hidden", "true");
+  const segments = [
+    ["weights", evidence.weights_bytes, "Model weights"],
+    [
+      "cache",
+      evidence.kv_cache_bytes,
+      `KV cache for ${request.context.toLocaleString()} tokens`,
+    ],
+    ["runtime", evidence.runtime_allowance_bytes, "Runtime allowance"],
+  ].filter(([, bytes]) => positive(bytes));
+  for (const [kind, bytes] of segments) {
+    const segment = element("span", `segment ${kind}`);
+    segment.style.flexGrow = String(bytes / scale);
+    track.append(segment);
+  }
+  if (track.lastChild) track.lastChild.classList.add("end");
+  if (scale > total) {
+    const rest = element("span", "segment-rest");
+    rest.style.flexGrow = String((scale - total) / scale);
+    track.append(rest);
+  }
+  if (budget) {
+    const marker = element("span", "budget-marker");
+    marker.style.left = `${Math.min((budget / scale) * 100, 100)}%`;
+    track.append(marker);
+  }
+
+  const legend = element("ul", "meter-legend");
+  for (const [kind, bytes, label] of segments) {
+    const item = element("li");
+    item.append(
+      element("span", `swatch ${kind}`),
+      element("span", "legend-label", label),
+      element("span", "legend-value", gib(bytes)),
+    );
+    legend.append(item);
+  }
+  if (budget) {
+    const item = element("li");
+    item.append(
+      element("span", "swatch budget"),
+      element("span", "legend-label", "Budget: 85% of free memory"),
+      element("span", "legend-value", gib(budget)),
+    );
+    legend.append(item);
+  }
+  const note = element(
+    "p",
+    "meter-note",
+    `${
+      available
+        ? `Free memory when checked: ${gib(available)}${positive(memory.total_bytes) ? ` of ${gib(memory.total_bytes)}` : ""}. `
+        : ""
+    }Estimates are guidance, not proof that the model will load.`,
+  );
+  meter.append(head, verdict, track, legend, note);
+  return [meter];
+}
+
+function showSnapshot(report, request) {
+  const parts =
+    request.tool === "doctor"
+      ? deviceSnapshot(report)
+      : request.tool === "inspect"
+        ? memorySnapshot(report, request)
+        : null;
+  if (!parts) return;
+  $("snapshot").append(...parts);
+  $("snapshot").hidden = false;
+}
+
 function showReport(report, request) {
   currentReport = report;
   const counts = {};
@@ -262,29 +571,28 @@ function showReport(report, request) {
       ? finding.status
       : "info";
     counts[status] = (counts[status] || 0) + 1;
-    const article = document.createElement("article");
-    article.className = "finding";
-    const top = document.createElement("div");
-    top.className = "finding-top";
-    const heading = document.createElement("h3");
-    heading.textContent = finding.title;
-    const badge = document.createElement("span");
-    badge.className = `badge ${status}`;
-    badge.textContent = labels[status];
-    top.append(heading, badge);
-    const detail = document.createElement("p");
-    detail.textContent = finding.detail;
-    article.append(top, detail);
+    const article = element("article", "finding");
+    article.dataset.status = status;
+    const mark = element("span", "finding-icon");
+    mark.append(icon(statusIcons[status]));
+    const body = element("div", "finding-body");
+    const top = element("div", "finding-top");
+    top.append(
+      element("h3", "", finding.title),
+      element("span", `badge ${status}`, labels[status]),
+    );
+    body.append(top, element("p", "", finding.detail));
     if (finding.action) {
-      const action = document.createElement("p");
-      action.className = "action";
-      action.textContent = `Next step: ${finding.action}`;
-      article.append(action);
+      const action = element("p", "action");
+      action.append(
+        element("strong", "", "Next step: "),
+        document.createTextNode(finding.action),
+      );
+      body.append(action);
     }
     if (finding.evidence !== null && finding.evidence !== undefined) {
       const details = document.createElement("details");
-      const summary = document.createElement("summary");
-      summary.textContent = "View evidence & request details";
+      const summary = element("summary", "", "View evidence & request details");
       const pre = document.createElement("pre");
       pre.tabIndex = 0;
       pre.textContent =
@@ -292,14 +600,18 @@ function showReport(report, request) {
           ? finding.evidence
           : JSON.stringify(finding.evidence, null, 2);
       details.append(summary, pre);
-      article.append(details);
+      body.append(details);
     }
+    article.append(mark, body);
     $("findings").append(article);
   }
   $("summary").replaceChildren();
   for (const [status, count] of Object.entries(counts)) {
-    const pill = document.createElement("span");
-    pill.textContent = `${count} ${labels[status].toLowerCase()}`;
+    const pill = element(
+      "span",
+      `count-pill ${status}`,
+      `${count} ${labels[status].toLowerCase()}`,
+    );
     $("summary").append(pill);
   }
   $("summary").hidden = false;
@@ -308,18 +620,18 @@ function showReport(report, request) {
   $("report-scope").textContent = report.scope;
   $("status").textContent =
     `Completed ${new Date(report.created_at).toLocaleString()}.`;
-  const context = [
-    request.protocol === "ollama" ? "Ollama native" : "OpenAI-compatible",
-  ];
+  const context = [protocolName(request.protocol)];
   if (request.model) context.push(request.model);
   if (request.context)
     context.push(`${request.context.toLocaleString()} tokens`);
   if (request.embedding_model)
     context.push(`Embeddings: ${request.embedding_model}`);
-  $("report-context").textContent = context.join(" · ");
+  for (const value of context)
+    $("report-context-list").append(element("li", "", value));
   $("report-context").hidden = false;
   $("export-note").hidden = false;
   showOutcome(report);
+  showSnapshot(report, request);
 }
 
 function renderActive() {
@@ -328,6 +640,7 @@ function renderActive() {
   if (saved && saved.key === JSON.stringify(requestFor(activeTool)))
     showReport(saved.report, saved.request);
   else showEmpty();
+  updateSteps();
   updateControls();
 }
 
@@ -385,7 +698,7 @@ async function run(tool = activeTool) {
       $("connection-status").textContent = "Unavailable";
       $("connection-dot").className = "connection-dot unavailable";
       $("connection-summary").textContent =
-        "Connection could not be checked. Run Doctor again.";
+        "Connection could not be checked. Check again.";
     }
   } finally {
     busy = false;
@@ -430,13 +743,20 @@ $("tool-form").addEventListener("submit", (event) => {
   event.preventDefault();
   run();
 });
-$("refresh").addEventListener("click", () => run("doctor"));
+for (const id of ["refresh", "recheck"])
+  $(id).addEventListener("click", () => run("doctor"));
 $("protocol").addEventListener("change", () => {
   modelOptions([]);
   run("doctor");
 });
 for (const id of ["model", "context", "embedding-model"])
   $(id).addEventListener("input", settingsChanged);
+document.querySelectorAll("[data-context]").forEach((chip) =>
+  chip.addEventListener("click", () => {
+    $("context").value = chip.dataset.context;
+    settingsChanged();
+  }),
+);
 document.querySelectorAll('input[name="check"]').forEach((input) =>
   input.addEventListener("change", () => {
     $("app-preset").value = "custom";
